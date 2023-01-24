@@ -22,7 +22,7 @@ Hotbar hotbar(5);
 
 void loadTextures()
 {
-    tilemap = LoadImage("resources/global.png");
+    tilemap = LoadImage("resources/Tiles/tiles.png");
     tileset = LoadTextureFromImage(tilemap);
 
     playerImg = LoadImage("resources/player.png");

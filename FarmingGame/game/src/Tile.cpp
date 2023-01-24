@@ -2,19 +2,33 @@
 #include "raylib.h"
 #include <cstdio>
 
-Tile::Tile() : Tile(1, 1, 10, 1000, false) {}
+Tile::Tile() : Tile(1, 1, 10, false) {}
 
-Tile::Tile(int x, int y, int textureID, int tileMapWidth, bool block) {
+Tile::Tile(int x, int y, int textureID, bool block) 
+{
     this->x = x;
     this->y = y;
     this->textureID = textureID;
-    this->tileMapWidth = tileMapWidth;
+    this->objectID = -1;
     this->block = block;
     this->tileSpeed = 5.0f;
-    this->objectID = 0;
-    float sx = (textureID % 148) * 16;
-    float sy = (int)(textureID / 148) * 16;
+    float sx = (textureID % 54) * 16;
+    float sy = (int)(textureID / 54) * 16;
     this->sourceRec = {sx, sy, SPRITE_SIZE, SPRITE_SIZE };
+    this->objectSourceRec = { sx, sy, SPRITE_SIZE, SPRITE_SIZE };
+}
+
+Tile::Tile(const Tile& other, int textureID, bool block)
+{
+    this->x = other.x;
+    this->y = other.y;
+    this->textureID = textureID;
+    this->objectID = -1;
+    this->block = block;
+    this->tileSpeed = 5.0f;
+    float sx = (textureID % 54) * 16;
+    float sy = (int)(textureID / 54) * 16;
+    this->sourceRec = { sx, sy, SPRITE_SIZE, SPRITE_SIZE };
     this->objectSourceRec = { sx, sy, SPRITE_SIZE, SPRITE_SIZE };
 }
 
@@ -37,6 +51,11 @@ void Tile::SetTextureID(int newtextureID)
     this->sourceRec = { sx, sy, SPRITE_SIZE, SPRITE_SIZE };
 }
 
+int Tile::GetTextureID()
+{
+    return this->textureID;
+}
+
 void Tile::SetObjectID(int newobjectID)
 {
     this->objectID = newobjectID;
@@ -55,28 +74,63 @@ float Tile::TileSpeed()
     return this->tileSpeed;
 }
 
-void Tile::Interact(int item)
+Tile* Tile::Interact(int item)
 {
-    switch (this->textureID)
-    {
-    case 908: //dirt
-        if (item == 1) //seed
-        {
-            this->SetObjectID(5049);  //seed
-        }
-        break;
-    case 9: //seed
-        if (item == 0) //hoe
-        {
-            this->SetTextureID(6);
-        }
-        break;
-    case 766: //grass
-        if (item == 0) //hoe
-        {
-            this->SetTextureID(908);
-        }
-        break;
-    }
+    return this;
+}
+
+DirtTile::DirtTile(int x, int y)
+    : Tile(x, y, DRY_DIRT, false)
+{
+    waterTicks = 0;
+}
+
+DirtTile::DirtTile(const Tile& other)
+    : Tile(other, DRY_DIRT, false)
+{
+    waterTicks = 0;
+}
+
+
+Tile* DirtTile::Interact(int item)
+{
+    return new WaterTile(*this);
+}
+
+void DirtTile::WetTile()
+{
+    this->waterTicks = WATER_TICKS;
+}
+
+GrassTile::GrassTile(int x, int y)
+    : Tile(x, y, GRASS, false)
+{
+}
+
+GrassTile::GrassTile(const Tile& other)
+    : Tile(other, GRASS, false)
+{
+}
+
+Tile* GrassTile::Interact(int item)
+{
+    return new DirtTile(*this);
+}
+
+
+WaterTile::WaterTile(int x, int y)
+    : Tile(x, y, WATER, true)
+{
+}
+
+WaterTile::WaterTile(const Tile& other)
+    : Tile(other, WATER, true)
+{
+}
+
+
+Tile* WaterTile::Interact(int item)
+{
+    return new GrassTile(*this);
 }
 

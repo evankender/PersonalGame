@@ -3,6 +3,7 @@
 #define MAP_H
 
 #include "raylib.h"
+#include <vector>
 #include "include/tile.h"
 
 const int MAP_WIDTH = 248;
@@ -17,7 +18,8 @@ public:
     float GetTileSpeed(int tileX, int tileY);
 private:
     Image tilemap;
-    Tile** map;
+    std::vector<std::vector<Tile*>> map;
 };
+
 
 #endif

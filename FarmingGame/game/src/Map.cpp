@@ -2,33 +2,28 @@
 #include "include/tile.h"
 #include <cstdio>
 
+
+
 Map::Map() 
 {
-    tilemap = LoadImage("resources/tilemap.png");
-    map = new Tile * [MAP_WIDTH];
+    map.resize(MAP_WIDTH);
     for (int i = 0; i < MAP_WIDTH; i++) {
-        map[i] = new Tile[MAP_HEIGHT];
+        map[i].resize(MAP_HEIGHT);
         for (int j = 0; j < MAP_HEIGHT; j++) {
             bool block = false;
             if (i < 15 || j < 9 || i > MAP_WIDTH - 15 || j > MAP_HEIGHT - 9) {
                 block = true;
-                map[i][j] = Tile(i, j, 465, tilemap.width, block);
+                map[i][j] = new WaterTile(i, j);
             }
             else {
-                map[i][j] = Tile(i, j, 766, tilemap.width, block);
+                map[i][j] = new GrassTile(i, j);
             }
-            
         }
     }
 }
 
 Map::~Map() 
 {
-    UnloadImage(tilemap);
-    for (int i = 0; i < MAP_WIDTH; i++) {
-        delete[] map[i];
-    }
-    delete[] map;
 }
 
 void Map::Draw(int playerX, int playerY, Texture2D tileset, int selSlot) 
@@ -74,19 +69,21 @@ void Map::Draw(int playerX, int playerY, Texture2D tileset, int selSlot)
     {
         tileEndY = MAP_HEIGHT;
     }
+    Tile* updatedTile;
 
+    
     for (int x = tileStartX; x < tileEndX; x++)
     {
         for (int y = tileStartY; y < tileEndY; y++)
         {
-            map[x][y].Draw(tileset, playerX, playerY, screenWidth, screenHeight);
-
+            map[x][y]->Draw(tileset, playerX, playerY, screenWidth, screenHeight);
             if ((x >= playerTileX - 1 && x <= playerTileX + 1) && (y >= playerTileY - 1 && y <= playerTileY + 1)) {
                 if (mouseTileX == x && mouseTileY == y) {
                     DrawRectangle(((x * TILE_SIZE) - (playerX - screenWidth / 2)), (y * TILE_SIZE) - (playerY - screenHeight / 2), TILE_SIZE, TILE_SIZE, GREEN);
-                    if (IsMouseButtonDown(MOUSE_LEFT_BUTTON))
+                    if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
                     {
-                        map[x][y].Interact(selSlot);
+                        updatedTile = map[mouseTileX][mouseTileY]->Interact(selSlot);
+                        map[mouseTileX][mouseTileY] = updatedTile;
                     }
                 }
             }
@@ -98,12 +95,12 @@ void Map::Draw(int playerX, int playerY, Texture2D tileset, int selSlot)
 
 bool Map::CheckBlocked(int tileX, int tileY)
 {
-    return map[tileX][tileY].BlockState();
+    return map[tileX][tileY]->BlockState();
 }
 
 float Map::GetTileSpeed(int tileX, int tileY)
 {
-    return map[tileX][tileY].TileSpeed();
+    return map[tileX][tileY]->TileSpeed();
 }
 
 
