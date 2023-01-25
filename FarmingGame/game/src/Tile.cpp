@@ -16,6 +16,7 @@ Tile::Tile(int x, int y, int textureID, bool block)
     float sy = (int)(textureID / 54) * 16;
     this->sourceRec = {sx, sy, SPRITE_SIZE, SPRITE_SIZE };
     this->objectSourceRec = { sx, sy, SPRITE_SIZE, SPRITE_SIZE };
+    this->code = 0;
 }
 
 Tile::Tile(const Tile& other, int textureID, bool block)
@@ -26,8 +27,8 @@ Tile::Tile(const Tile& other, int textureID, bool block)
     this->objectID = -1;
     this->block = block;
     this->tileSpeed = 5.0f;
-    float sx = (textureID % 54) * 16;
-    float sy = (int)(textureID / 54) * 16;
+    float sx = (textureID % 54) * SPRITE_SIZE;
+    float sy = (int)(textureID / 54) * SPRITE_SIZE;
     this->sourceRec = { sx, sy, SPRITE_SIZE, SPRITE_SIZE };
     this->objectSourceRec = { sx, sy, SPRITE_SIZE, SPRITE_SIZE };
 }
@@ -46,8 +47,8 @@ void Tile::Draw(Texture2D tileSet, int playerX, int playerY, int screenWidth, in
 void Tile::SetTextureID(int newtextureID)
 {
     this->textureID = newtextureID;
-    float sx = (textureID % 148) * 16;
-    float sy = (int)(textureID / 148) * 16;
+    float sx = (textureID % 54) * SPRITE_SIZE;
+    float sy = (int)(textureID / 54) * SPRITE_SIZE;
     this->sourceRec = { sx, sy, SPRITE_SIZE, SPRITE_SIZE };
 }
 
@@ -79,28 +80,60 @@ Tile* Tile::Interact(int item)
     return this;
 }
 
+int Tile::GetType()
+{
+    return -1;
+}
+
+void Tile::SetCode(unsigned int newCode)
+{
+    this->code = newCode;
+}
 DirtTile::DirtTile(int x, int y)
     : Tile(x, y, DRY_DIRT, false)
 {
-    waterTicks = 0;
+    waterTicks = -1;
 }
 
 DirtTile::DirtTile(const Tile& other)
     : Tile(other, DRY_DIRT, false)
 {
-    waterTicks = 0;
+    waterTicks = -1;
 }
-
 
 Tile* DirtTile::Interact(int item)
 {
-    return new WaterTile(*this);
+    switch (item)
+    {
+    case 0: //hoe
+        return new WaterTile(*this);
+        break;
+    case 1: //axe
+        break;
+    case 2: //water
+        this->WetTile();
+        break;
+    }
+    return this;
 }
 
 void DirtTile::WetTile()
 {
+    if (this->waterTicks < 0)
+    {
+        int newTextureID = this->GetTextureID() + (54*3);
+        this->SetTextureID(newTextureID);
+    }
     this->waterTicks = WATER_TICKS;
+    this->cornersAndEdges.resize(8);
+    this->cornersAndEdges = { 0, 0, 0, 0, 0, 0 ,0 ,0 };
 }
+
+int DirtTile::GetType()
+{
+    return 1;
+}
+
 
 GrassTile::GrassTile(int x, int y)
     : Tile(x, y, GRASS, false)
@@ -117,6 +150,10 @@ Tile* GrassTile::Interact(int item)
     return new DirtTile(*this);
 }
 
+int GrassTile::GetType()
+{
+    return 2;
+}
 
 WaterTile::WaterTile(int x, int y)
     : Tile(x, y, WATER, true)
@@ -132,5 +169,10 @@ WaterTile::WaterTile(const Tile& other)
 Tile* WaterTile::Interact(int item)
 {
     return new GrassTile(*this);
+}
+
+int WaterTile::GetType()
+{
+    return 0;
 }
 
