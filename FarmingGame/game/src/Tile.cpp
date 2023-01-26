@@ -228,7 +228,7 @@ Tile* DirtTile::Interact(int item)
     case 1: //axe
         break;
     case 2: //water
-        wet = true;
+        ////wet = true;
         break;
     }
     return this;
@@ -236,7 +236,7 @@ Tile* DirtTile::Interact(int item)
 
 void DirtTile::WetTile()
 {
-    wet = true;
+    //wet = true;
 }
 
 int DirtTile::GetType()
@@ -246,8 +246,8 @@ int DirtTile::GetType()
 
 void DirtTile::CodeToID(unsigned int _code)
 {
-    code = _code;
-    SetTextureID(blobTable[code]);
+    SetCode(_code);
+    SetTextureID(blobTable[_code]);
 }
 
 

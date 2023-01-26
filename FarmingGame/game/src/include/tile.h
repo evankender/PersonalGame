@@ -43,17 +43,17 @@ public:
     virtual int GetType();
     void SetCode(unsigned int newCode);
     virtual void CodeToID(unsigned int Code);
-    int objectID;
-    int x;
-    int y;
-    unsigned int code;
-    bool wet;
 private:
     bool block;
     TileID textureID;
     float tileSpeed;
     Rectangle sourceRec;
     Rectangle objectSourceRec;
+    int objectID;
+    int x;
+    int y;
+    unsigned int code;
+    bool wet;
 };
 
 class DirtTile : public Tile {

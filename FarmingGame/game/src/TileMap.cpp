@@ -88,16 +88,12 @@ void TileMap::Draw(int playerX, int playerY, Texture2D tileset, int selSlot)
             thisCode = GetTileCode(row, col);
             tileMap[row][col]->CodeToID(thisCode);
             tileMap[row][col]->Draw(tileset, playerX, playerY, screenWidth, screenHeight);
-
-
             if ((col >= playerCol - 1 && col <= playerCol + 1) && (row >= playerRow - 1 && row <= playerRow + 1)) 
             {     
                 if (mouseCol == col && mouseRow == row) 
                 {
                     Rectangle destinationRec = { ((col * TILE_SIZE) - (playerX - screenWidth / 2)) - 30 , ((row * TILE_SIZE) - (playerY - screenHeight / 2)) - 30, TILE_SIZE-5.6f, TILE_SIZE-5.6f };
                     Vector2 originVec = { 32 , 32 };
-                    //DrawRectanglePro(destinationRec, originVec, 0, RED);
-
                     DrawRectangleRoundedLines(destinationRec, .2f, 5, 4.0f, GOLD);
                     
                     if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
@@ -115,8 +111,6 @@ void TileMap::Draw(int playerX, int playerY, Texture2D tileset, int selSlot)
                         else
                         {
                             SetTile(col, row, 0);
-                            thisCode = GetTileCode(row, col);
-                            std::cout << "Tile code  at water (" << col << ", " << row << "): " << edgeMap[(row * 2) + 1][(col * 2) + 1] << std::endl;
                         }
                     }
                 }
@@ -160,7 +154,6 @@ unsigned int TileMap::GetTileCode(int y, int x) {
 
 void TileMap::SetTile(int x, int y, int val)
 {
-    //std::cout << "Tile code at (" << (y + 1) * 2 << ", " << (x + 1) * 2 << "): " << std::endl;
     int newY = (y * 2) + 1;
     int newX = (x * 2) + 1;
     edgeMap[newY][newX] = val;
