@@ -1,13 +1,13 @@
 #include "raylib.h"
-#include "map.h"
+#include "include/tilemap.h"
 
 
 class Player {
 public:
     int playerX;
     int playerY;
-    Map * mapPtr;
-    Player(Map &map);
+    TileMap * mapPtr;
+    Player(TileMap &tileMap);
     void move(int dx, int dy);
     void DrawPlayer(int screenWidth, int screenHeight, Texture2D playerSprite);
     void UpdateSpeed();

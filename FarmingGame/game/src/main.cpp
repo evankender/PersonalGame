@@ -1,7 +1,7 @@
 #include <raylib.h>
 #include <raymath.h>
 #include "include/tile.h"
-#include "include/map.h"
+#include "include/tilemap.h"
 #include "include/player.h"
 #include "include/gui.h"
 #include <cstdlib>
@@ -16,13 +16,13 @@ Texture2D playerSprite;
 int screenWidth = 1600;
 int screenHeight = 900;
 
-Map map;
-Player player(map);
+TileMap tileMap;
+Player player(tileMap);
 Hotbar hotbar(5);
 
 void loadTextures()
 {
-    tilemap = LoadImage("resources/Tiles/tiles.png");
+    tilemap = LoadImage("resources/Tiles/blob.png");
     tileset = LoadTextureFromImage(tilemap);
 
     playerImg = LoadImage("resources/player.png");
@@ -84,12 +84,11 @@ int main()
         HandleInput();
        
         BeginDrawing();
-
-        map.Draw(player.playerX, player.playerY, tileset, hotbar.GetSelSlot());
-        hotbar.Draw();
+        tileMap.Draw(player.playerX, player.playerY, tileset, hotbar.GetSelSlot());
 
         player.UpdateSpeed();
         player.DrawPlayer(screenWidth, screenHeight, playerSprite);
+        hotbar.Draw();
 
         ClearBackground(WHITE);
         EndDrawing();

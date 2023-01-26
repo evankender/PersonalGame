@@ -1,78 +1,189 @@
 #include "include/tile.h"
 #include "raylib.h"
 #include <cstdio>
+#include <unordered_map>
+#include <iostream>
+using namespace std;
 
-Tile::Tile() : Tile(1, 1, 10, false) {}
-
-Tile::Tile(int x, int y, int textureID, bool block) 
+TileID::TileID()
 {
-    this->x = x;
-    this->y = y;
-    this->textureID = textureID;
-    this->objectID = -1;
-    this->block = block;
-    this->tileSpeed = 5.0f;
-    float sx = (textureID % 54) * 16;
-    float sy = (int)(textureID / 54) * 16;
-    this->sourceRec = {sx, sy, SPRITE_SIZE, SPRITE_SIZE };
-    this->objectSourceRec = { sx, sy, SPRITE_SIZE, SPRITE_SIZE };
-    this->code = 0;
+    id = -1;
+    rotation = 0.0f;
 }
 
-Tile::Tile(const Tile& other, int textureID, bool block)
+TileID::TileID(int _id, float _rotation)
 {
-    this->x = other.x;
-    this->y = other.y;
-    this->textureID = textureID;
-    this->objectID = -1;
-    this->block = block;
-    this->tileSpeed = 5.0f;
-    float sx = (textureID % 54) * SPRITE_SIZE;
-    float sy = (int)(textureID / 54) * SPRITE_SIZE;
-    this->sourceRec = { sx, sy, SPRITE_SIZE, SPRITE_SIZE };
-    this->objectSourceRec = { sx, sy, SPRITE_SIZE, SPRITE_SIZE };
+    id = _id;
+    rotation = _rotation;
+}
+
+int TileID::GetID()
+{
+    return id;
+}
+
+float TileID::GetRotation()
+{
+    return rotation;
+}
+
+unordered_map<int, TileID> blobTable = {  //inserting element directly in map
+ {0 , TileID(0 , 0.0f)},
+
+ {1  ,   TileID(1  ,  0.0f)}  ,  
+ {4  ,   TileID(1  ,  90.0f)}  ,  
+ {16  ,   TileID(1  ,  180.0f)}  ,  
+ {64  ,   TileID(1  ,  270.0f)}  ,  
+
+ {5  ,   TileID(2 , 0.0f)} , 
+ {20 ,  TileID(2 , 90.0f)} , 
+ {80 ,  TileID(2 , 180.0f)} , 
+ {65 ,  TileID(2 , 270.0f)} , 
+
+ {7 ,  TileID(3 , 0.0f)} , 
+ {28 ,  TileID(3 , 90.0f)} , 
+ {112 ,  TileID(3 , 180.0f)} , 
+ {193 ,  TileID(3 , 270.0f)} , 
+
+ {17 ,  TileID(4 , 0.0f)} , 
+ {68 ,  TileID(4 , 90.0f)} , 
+
+ {21 ,  TileID(5 , 0.0f)} , 
+ {84 ,  TileID(5 , 90.0f)} , 
+ {81 ,  TileID(5 , 180.0f)} , 
+ {69 ,  TileID(5 , 270.0f)} , 
+
+ {23 ,  TileID(6 , 0.0f)} , 
+ {92 ,  TileID(6 , 90.0f)} , 
+ {113 ,  TileID(6 , 180.0f)} , 
+ {197 ,  TileID(6 , 270.0f)} , 
+
+ {29 ,  TileID(7 , 0.0f)} , 
+ {116 ,  TileID(7 , 90.0f)} , 
+ {209 ,  TileID(7 , 180.0f)} , 
+ {71 ,  TileID(7 , 270.0f)} , 
+
+ {31 ,  TileID(8 , 0.0f)} , 
+ {124 ,  TileID(8 , 90.0f)} , 
+ {241 ,  TileID(8 , 180.0f)} , 
+ {199 ,  TileID(8 , 270.0f)} , 
+
+ {85 ,  TileID(9 , 0.0f)} , 
+
+ {87 ,  TileID(10  ,  0.0f)} , 
+ {93 ,  TileID(10  ,  90.0f)} , 
+ {117 ,  TileID(10  ,  180.0f)} , 
+ {213 ,  TileID(10  ,  270.0f)} , 
+
+ {95 ,  TileID(11  ,  0.0f)} ,
+ {125 ,  TileID(11  ,  90.0f)} ,
+ {245 ,  TileID(11  ,  180.0f)} ,
+ {215 ,  TileID(11  ,  270.0f)} ,
+
+ {119 ,  TileID(12  ,  0.0f)} ,
+ {221 ,  TileID(12  ,  90.0f)} ,
+
+ {127 ,  TileID(13  ,  0.0f)} ,
+ {253 ,  TileID(13  ,  90.0f)} ,
+ {247 ,  TileID(13  ,  180.0f)} ,
+ {223 ,  TileID(13  ,  270.0f)} ,
+
+ {255 ,  TileID(14  ,  0.0f)} ,
+};
+
+Tile::Tile() : Tile(1, 1, 31, false) {}
+
+Tile::Tile(int _x, int _y, int _textureID, bool _block) 
+{
+    x = _x;
+    y = _y;
+    textureID = TileID(_textureID, 0.0f);
+    block = _block;
+    tileSpeed = 5.0f;
+
+    float sx = (textureID.GetID() % 15) * TILE_SPRITE_SIZE;
+    float sy = (int)(textureID.GetID() / 15) * TILE_SPRITE_SIZE;
+    sourceRec = { sx, sy, TILE_SPRITE_SIZE, TILE_SPRITE_SIZE };
+    code = -1;
+    wet = false;
+}
+
+Tile::Tile(const Tile& other, int _textureID, bool _block)
+{
+    x = other.x;
+    y = other.y;
+    textureID = TileID(_textureID, 0.0f);
+    block =_block;
+    tileSpeed = 5.0f;
+    float sx = (textureID.GetID() % 15) * TILE_SPRITE_SIZE;
+    float sy = (int)(textureID.GetID() / 15) * TILE_SPRITE_SIZE;
+    sourceRec = { sx, sy, TILE_SPRITE_SIZE, TILE_SPRITE_SIZE };
+    code = -1;
+    wet = false;
 }
 
 void Tile::Draw(Texture2D tileSet, int playerX, int playerY, int screenWidth, int screenHeight) 
 { 
-    Rectangle destinationRec = { ((x * TILE_SIZE) - (playerX - screenWidth / 2)), (y * TILE_SIZE) - (playerY - screenHeight / 2), TILE_SIZE, TILE_SIZE };
-    Vector2 destVec = { 0 , 0 };
-    DrawTexturePro(tileSet, sourceRec, destinationRec, destVec, 0.0f, WHITE);
-    if (objectID > 0)
+    if (wet)
     {
-        DrawTexturePro(tileSet, objectSourceRec, destinationRec, destVec, 0.0f, WHITE);
+        float sx = (textureID.GetID() % 15) * TILE_SPRITE_SIZE;
+        float sy = (int)(textureID.GetID() / 15) * TILE_SPRITE_SIZE;
+        sourceRec = { sx, sy+32, TILE_SPRITE_SIZE, TILE_SPRITE_SIZE };
     }
+
+    Rectangle destinationRec = { ((x * TILE_SIZE) - (playerX - screenWidth / 2)), (y * TILE_SIZE) - (playerY - screenHeight / 2), TILE_SIZE, TILE_SIZE };
+    Vector2 destVec = { 32 , 32 };
+    float rotation = textureID.GetRotation();
+    DrawTexturePro(tileSet, sourceRec, destinationRec, destVec, rotation, WHITE);
+    //std::cout << "Tile code at (" << col << ", " << row << "): " << thisCode << std::endl;
 }
 
 void Tile::SetTextureID(int newtextureID)
 {
-    this->textureID = newtextureID;
-    float sx = (textureID % 54) * SPRITE_SIZE;
-    float sy = (int)(textureID / 54) * SPRITE_SIZE;
-    this->sourceRec = { sx, sy, SPRITE_SIZE, SPRITE_SIZE };
+    textureID = TileID(newtextureID, 0);
+    float sx = (textureID.GetID() % 15) * TILE_SPRITE_SIZE;
+    float sy = (int)(textureID.GetID() / 15) * TILE_SPRITE_SIZE;
+    sourceRec = { sx, sy, TILE_SPRITE_SIZE, TILE_SPRITE_SIZE };
+}
+
+void Tile::SetTextureID(int newtextureID, float rotation)
+{
+    textureID = TileID(newtextureID, rotation);
+    float sx = (textureID.GetID() % 15) * TILE_SPRITE_SIZE;
+    float sy = (int)(textureID.GetID() / 15) * TILE_SPRITE_SIZE;
+    sourceRec = { sx, sy, TILE_SPRITE_SIZE, TILE_SPRITE_SIZE };
+}
+
+void Tile::SetTextureID(TileID tileID)
+{
+    textureID = tileID;
+    float sx = (textureID.GetID() % 15) * TILE_SPRITE_SIZE;
+    float sy = (int)(textureID.GetID() / 15) * TILE_SPRITE_SIZE;
+    sourceRec = { sx, sy, TILE_SPRITE_SIZE, TILE_SPRITE_SIZE };
 }
 
 int Tile::GetTextureID()
 {
-    return this->textureID;
+    return textureID.GetID();
+}
+
+float Tile::GetIDRotation()
+{
+    return textureID.GetRotation();
 }
 
 void Tile::SetObjectID(int newobjectID)
 {
-    this->objectID = newobjectID;
-    float sx = (objectID % 148) * 16;
-    float sy = (int)(objectID / 148) * 16;
-    this->objectSourceRec = { sx, sy, SPRITE_SIZE, SPRITE_SIZE };
 }
 
 bool Tile::BlockState()
 {
-    return this->block;
+    return block;
 }
 
 float Tile::TileSpeed()
 {
-    return this->tileSpeed;
+    return tileSpeed;
 }
 
 Tile* Tile::Interact(int item)
@@ -82,23 +193,29 @@ Tile* Tile::Interact(int item)
 
 int Tile::GetType()
 {
-    return -1;
+    return 0;
 }
 
 void Tile::SetCode(unsigned int newCode)
 {
-    this->code = newCode;
+    code = newCode;
 }
+
+void Tile::CodeToID(unsigned int _code)
+{
+    code = _code;
+    SetTextureID(blobTable[code]);
+}
+
+
 DirtTile::DirtTile(int x, int y)
     : Tile(x, y, DRY_DIRT, false)
 {
-    waterTicks = -1;
 }
 
 DirtTile::DirtTile(const Tile& other)
     : Tile(other, DRY_DIRT, false)
 {
-    waterTicks = -1;
 }
 
 Tile* DirtTile::Interact(int item)
@@ -111,7 +228,7 @@ Tile* DirtTile::Interact(int item)
     case 1: //axe
         break;
     case 2: //water
-        this->WetTile();
+        wet = true;
         break;
     }
     return this;
@@ -119,19 +236,18 @@ Tile* DirtTile::Interact(int item)
 
 void DirtTile::WetTile()
 {
-    if (this->waterTicks < 0)
-    {
-        int newTextureID = this->GetTextureID() + (54*3);
-        this->SetTextureID(newTextureID);
-    }
-    this->waterTicks = WATER_TICKS;
-    this->cornersAndEdges.resize(8);
-    this->cornersAndEdges = { 0, 0, 0, 0, 0, 0 ,0 ,0 };
+    wet = true;
 }
 
 int DirtTile::GetType()
 {
     return 1;
+}
+
+void DirtTile::CodeToID(unsigned int _code)
+{
+    code = _code;
+    SetTextureID(blobTable[code]);
 }
 
 
@@ -155,6 +271,10 @@ int GrassTile::GetType()
     return 2;
 }
 
+void GrassTile::CodeToID(unsigned int code)
+{
+}
+
 WaterTile::WaterTile(int x, int y)
     : Tile(x, y, WATER, true)
 {
@@ -168,11 +288,17 @@ WaterTile::WaterTile(const Tile& other)
 
 Tile* WaterTile::Interact(int item)
 {
-    return new GrassTile(*this);
+    return this;
 }
 
 int WaterTile::GetType()
 {
-    return 0;
+    return 5;
 }
+
+void WaterTile::CodeToID(unsigned int code)
+{
+}
+
+
 

@@ -6,11 +6,11 @@ GUI::GUI()
    
 }
 
-Hotbar::Hotbar(int numSlots)
+Hotbar::Hotbar(int _numSlots)
 {
-    this->selSlot = 0;
-	this->numSlots = numSlots;
-    this->itemSize = 84;
+    selSlot = 0;
+	numSlots = _numSlots;
+    itemSize = 84;
 }
 
 void Hotbar::Draw()

@@ -1,29 +1,35 @@
-#include "include/map.h"
+#include "include/tilemap.h"
 #include "include/tile.h"
 #include "include/player.h"
 
-Player::Player(Map &map) {
-    this->playerX = (TILE_SIZE * (MAP_WIDTH / 2));
-    this->playerY = (TILE_SIZE * (MAP_HEIGHT / 2));
-    this->sourceRec = { 0, 0, 64, 64 };
-    this->destVec = { 64 , 64 };
-    this->mapPtr = &map;
-    this->playerSpeed = 1.0f;
+Player::Player(TileMap &tileMap) {
+    playerX = (TILE_SIZE * (MAP_WIDTH / 2));
+    playerY = (TILE_SIZE * (MAP_HEIGHT / 2));
+    sourceRec = { 0, 0, 64, 64 };
+    destVec = { 64 , 64 };
+    mapPtr = &tileMap;
+    playerSpeed = 1.0f;
 }
 
 void Player::move(int dx, int dy) {
 
-    int newX = playerX + (dx * this->playerSpeed);
-    int newY = playerY + (dy * this->playerSpeed);
-
-    int playerTileX = newX / TILE_SIZE;
-    int playerTileY = newY / TILE_SIZE;
-
-    if (!this->mapPtr->CheckBlocked(playerTileX, playerTileY))
+    int newX = playerX + (dx * playerSpeed);
+    int newY = playerY + (dy * playerSpeed);
+    int playerCol = (newX + 30) / TILE_SIZE;
+    int playerRow = (newY + 50) / TILE_SIZE;
+  
+    if (!mapPtr->CheckBlocked(playerRow, playerCol))
     {
-        this->playerX = newX;
-        this->playerY = newY;
+        playerX = newX;
+        playerY = newY;
     }
+    else
+    {
+        playerX = playerX - (dx * (playerSpeed / 2));
+        playerY = playerY - (dy * (playerSpeed / 2));
+
+    }
+
 }
 
 void Player::DrawPlayer(int screenWidth, int screenHeight, Texture2D playerSprite)
@@ -34,8 +40,9 @@ void Player::DrawPlayer(int screenWidth, int screenHeight, Texture2D playerSprit
 
 void Player::UpdateSpeed()
 {
-    int playerTileX = playerX / TILE_SIZE;
-    int playerTileY = playerY / TILE_SIZE;
 
-    this->playerSpeed = this->mapPtr->GetTileSpeed(playerTileX, playerTileY);
+    int playerCol = (playerX + 32) / TILE_SIZE;
+    int playerRow = (playerY + 50) / TILE_SIZE;
+
+    playerSpeed = mapPtr->GetTileSpeed(playerRow, playerCol);
 }

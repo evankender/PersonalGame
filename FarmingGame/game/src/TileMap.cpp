@@ -1,22 +1,22 @@
-#include "include/map.h"
+#include "include/tilemap.h"
 #include "include/tile.h"
 #include <cstdio>
 #include <iostream>
 using namespace std;
 
-Map::Map() 
+TileMap::TileMap() 
 {
-    map.resize(MAP_HEIGHT);
+    tileMap.resize(MAP_HEIGHT);
     for (int r = 0; r < MAP_HEIGHT; r++) {
-        map[r].resize(MAP_WIDTH);
+        tileMap[r].resize(MAP_WIDTH);
         for (int c = 0; c < MAP_WIDTH; c++) {
             bool block = false;
             if (c < 15 || r < 9 || c > MAP_WIDTH - 15 || r > MAP_HEIGHT - 9) {
                 block = true;
-                map[r][c] = new WaterTile(c, r);
+                tileMap[r][c] = new WaterTile(c, r);
             }
             else {
-                map[r][c] = new GrassTile(c, r);
+                tileMap[r][c] = new GrassTile(c, r);
             }
         }
     }
@@ -30,14 +30,14 @@ Map::Map()
     }
 }
 
-Map::~Map() 
+TileMap::~TileMap() 
 {
 }
 
-void Map::Draw(int playerX, int playerY, Texture2D tileset, int selSlot) 
+void TileMap::Draw(int playerX, int playerY, Texture2D tileset, int selSlot) 
 {
-    int mouseX = GetMouseX();
-    int mouseY = GetMouseY();
+    int mouseX = GetMouseX() + 32;
+    int mouseY = GetMouseY() + 32;
 
     int screenWidth = GetScreenWidth();
     int screenHeight = GetScreenHeight();
@@ -45,8 +45,8 @@ void Map::Draw(int playerX, int playerY, Texture2D tileset, int selSlot)
     int mouseCol = ((((mouseX + (playerX - screenWidth / 2))) / TILE_SIZE));
     int mouseRow = ((mouseY + (playerY - screenHeight / 2)) / TILE_SIZE);
 
-    int playerCol = playerX / TILE_SIZE;
-    int playerRow = playerY / TILE_SIZE;
+    int playerCol = (playerX + 32) / TILE_SIZE;
+    int playerRow = (playerY + 50) / TILE_SIZE;
 
     int tileWidth = screenWidth / TILE_SIZE;
     int tileHeight = screenHeight / TILE_SIZE;
@@ -85,22 +85,39 @@ void Map::Draw(int playerX, int playerY, Texture2D tileset, int selSlot)
         for (int col = 0; col < MAP_WIDTH; col++)
         {
             unsigned int thisCode;
-            map[row][col]->Draw(tileset, playerX, playerY, screenWidth, screenHeight);
-            if ((col >= playerCol - 1 && col <= playerCol + 1) && (row >= playerRow - 1 && row <= playerRow + 1)) {        
-                if (mouseCol == col && mouseRow == row) {
-                    DrawRectangle(((col * TILE_SIZE) - (playerX - screenWidth / 2)), (row * TILE_SIZE) - (playerY - screenHeight / 2), TILE_SIZE, TILE_SIZE, GREEN);
+            thisCode = GetTileCode(row, col);
+            tileMap[row][col]->CodeToID(thisCode);
+            tileMap[row][col]->Draw(tileset, playerX, playerY, screenWidth, screenHeight);
+
+
+            if ((col >= playerCol - 1 && col <= playerCol + 1) && (row >= playerRow - 1 && row <= playerRow + 1)) 
+            {     
+                if (mouseCol == col && mouseRow == row) 
+                {
+                    Rectangle destinationRec = { ((col * TILE_SIZE) - (playerX - screenWidth / 2)) - 30 , ((row * TILE_SIZE) - (playerY - screenHeight / 2)) - 30, TILE_SIZE-5.6f, TILE_SIZE-5.6f };
+                    Vector2 originVec = { 32 , 32 };
+                    //DrawRectanglePro(destinationRec, originVec, 0, RED);
+
+                    DrawRectangleRoundedLines(destinationRec, .2f, 5, 4.0f, GOLD);
+                    
                     if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
                     {
-                        updatedTile = map[mouseRow][mouseCol]->Interact(selSlot);
-                        map[mouseRow][mouseCol] = updatedTile;
-                        if (map[mouseRow][mouseCol]->GetType() == 1) {
-                            this->SetTile(col, row, 1);
-                            this->UpdateEdge();
-                            this->UpdateCorner();
-                            thisCode = this->GetTileCode(row, col);
+                        updatedTile = tileMap[row][col]->Interact(selSlot);
+                        tileMap[row][col] = updatedTile;
+
+                        if (tileMap[row][col]->GetType() == 1)                        
+                        {
+                            SetTile(col, row, 1); 
+                            thisCode = GetTileCode(row, col);
+                            tileMap[row][col]->CodeToID(thisCode);
                             std::cout << "Tile code at (" << col << ", " << row << "): " << thisCode << std::endl;
                         }
-
+                        else
+                        {
+                            SetTile(col, row, 0);
+                            thisCode = GetTileCode(row, col);
+                            std::cout << "Tile code  at water (" << col << ", " << row << "): " << edgeMap[(row * 2) + 1][(col * 2) + 1] << std::endl;
+                        }
                     }
                 }
                
@@ -112,17 +129,17 @@ void Map::Draw(int playerX, int playerY, Texture2D tileset, int selSlot)
 }
 
 
-bool Map::CheckBlocked(int tileX, int tileY)
+bool TileMap::CheckBlocked(int row, int col)
 {
-    return map[tileX][tileY]->BlockState();
+    return tileMap[row][col]->BlockState();
 }
 
-float Map::GetTileSpeed(int tileX, int tileY)
+float TileMap::GetTileSpeed(int row, int col)
 {
-    return map[tileX][tileY]->TileSpeed();
+    return tileMap[row][col]->TileSpeed();
 }
 
-unsigned int Map::GetTileCode(int y, int x) {
+unsigned int TileMap::GetTileCode(int y, int x) {
     unsigned int code = 0;
     y = (y * 2) + 1;
     x = (x * 2) + 1;
@@ -141,37 +158,17 @@ unsigned int Map::GetTileCode(int y, int x) {
     return code;
 }
 
-void Map::SetTile(int x, int y, int val)
+void TileMap::SetTile(int x, int y, int val)
 {
     //std::cout << "Tile code at (" << (y + 1) * 2 << ", " << (x + 1) * 2 << "): " << std::endl;
     int newY = (y * 2) + 1;
     int newX = (x * 2) + 1;
-    edgeMap[newY][newX] = 1;
-
-    /*
-    if (edgeMap[newY - 2][newX] == 1)
-    {
-        edgeMap[newY - 1][newX] = 1;
-    }
-
-    if (edgeMap[newY + 2][newX] == 1)
-    {
-        edgeMap[newY + 1][newX] = 1;
-    }
-
-    if (edgeMap[newY][newX - 2] == 1)
-    {
-        edgeMap[newY][newX - 1] = 1;
-    }
-
-    if (edgeMap[newY][newX + 2] == 1)
-    {
-        edgeMap[newY][newX + 1] = 1;
-    }
-    */
+    edgeMap[newY][newX] = val;
+    UpdateEdge();
+    UpdateCorner();
 }
 
-void Map::UpdateEdge()
+void TileMap::UpdateEdge()
 {
     for (int r = 0; r < EDGE_MAP_HEIGHT; r++) {
         int c = 0;
@@ -183,20 +180,22 @@ void Map::UpdateEdge()
         }
 
         for (c; c < EDGE_MAP_WIDTH; c += 2) {
+            
             if (((r != 0) && (c != 0)) && (r != EDGE_MAP_HEIGHT - 1) && (c != EDGE_MAP_WIDTH - 1))
             {
+                edgeMap[r][c] = 0;
                 switch (evenRow)
                 {
                 case false:
-                    if ((this->edgeMap[r][c - 1] == 1) && (this->edgeMap[r][c + 1] == 1))
+                    if ((edgeMap[r][c - 1] == 1) && (edgeMap[r][c + 1] == 1))
                     {
-                        this->edgeMap[r][c] = 1;
+                        edgeMap[r][c] = 1;
                     }
                     break;
                 case true:
-                    if ((this->edgeMap[r - 1][c] == 1) && (this->edgeMap[r + 1][c] == 1))
+                    if ((edgeMap[r - 1][c] == 1) && (edgeMap[r + 1][c] == 1))
                     {
-                        this->edgeMap[r][c] = 1;
+                        edgeMap[r][c] = 1;
                     }
                     break;
                 }
@@ -205,10 +204,11 @@ void Map::UpdateEdge()
     }
 }
 
-void Map::UpdateCorner()
+void TileMap::UpdateCorner()
 {
     for (int r = 0; r < EDGE_MAP_HEIGHT; r += 2) {
         for (int c = 0; c < EDGE_MAP_WIDTH; c += 2) {
+            edgeMap[r][c] = 0;
             if (((r != 0) && (c != 0)) && ((r != EDGE_MAP_HEIGHT - 1) && (c != EDGE_MAP_WIDTH - 1)))
             {
                 if ((edgeMap[r - 1][c] == 1) && (edgeMap[r + 1][c] == 1) && (edgeMap[r][c + 1] == 1) && (edgeMap[r][c + 1] == 1))
