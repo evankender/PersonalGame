@@ -30,7 +30,7 @@ public:
     Tile();
     Tile(int x, int y, int textureID, bool block);
     Tile(const Tile& other, int textureID, bool block);
-    virtual void Draw(Texture2D tileSet, int playerX, int playerY, int screenWidth, int screenHeight);
+    virtual void Draw(Texture2D tileSet, int playerX, int playerY, int screenWidth, int screenHeight, std::vector<int> mudCode);
     void SetTextureID(int textureID);
     void SetTextureID(int textureID, float rotation);
     void Tile::SetTextureID(TileID tileID);
@@ -43,6 +43,7 @@ public:
     virtual int GetType();
     void SetCode(unsigned int newCode);
     virtual void CodeToID(unsigned int Code);
+    bool wet;
 private:
     bool block;
     TileID textureID;
@@ -53,7 +54,7 @@ private:
     int x;
     int y;
     unsigned int code;
-    bool wet;
+    
 };
 
 class DirtTile : public Tile {

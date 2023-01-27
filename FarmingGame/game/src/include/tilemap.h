@@ -20,6 +20,7 @@ public:
     bool CheckBlocked(int tileX, int tileY);
     float GetTileSpeed(int tileX, int tileY);
     unsigned int GetTileCode(int x, int y);
+    std::vector<int> GetTileCodeMud(int x, int y);
     void SetTile(int x, int y, int val);
     void UpdateEdge();
     void UpdateCorner();

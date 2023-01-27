@@ -91,6 +91,42 @@ unordered_map<int, TileID> blobTable = {  //inserting element directly in map
  {255 ,  TileID(14  ,  0.0f)} ,
 };
 
+unordered_map<int, TileID> edgeTable = {  //inserting element directly in map
+ {0 , TileID(0 , 0.0f)},
+
+ {130, TileID(32 , 0.0f)},
+ {10, TileID(32 , 90.0f)},
+ {40, TileID(32 , 180.0f)},
+ {160, TileID(32 , 270.0f)},
+
+ {4, TileID(33 , 0.0f)},
+ {16, TileID(33 , 90.0f)},
+ {64, TileID(33 , 180.0f)},
+ {256, TileID(33 , 270.0f)},
+
+ {260, TileID(34 , 0.0f)},
+ {20, TileID(34 , 90.0f)},
+ {80, TileID(34 , 180.0f)},
+ {310, TileID(34 , 270.0f)},
+
+ {8, TileID(35 , 0.0f)},
+ {32, TileID(35 , 90.0f)},
+ {128, TileID(35 , 180.0f)},
+ {512, TileID(35 , 270.0f)},
+
+ {258, TileID(36 , 0.0f)},
+ {12, TileID(36 , 90.0f)},
+ {48, TileID(36 , 180.0f)},
+ {192, TileID(36 , 270.0f)},
+
+ {6, TileID(37 , 0.0f)},
+ {24, TileID(37 , 90.0f)},
+ {96, TileID(37 , 180.0f)},
+ {384, TileID(37 , 270.0f)},
+
+
+};
+
 Tile::Tile() : Tile(1, 1, 31, false) {}
 
 Tile::Tile(int _x, int _y, int _textureID, bool _block) 
@@ -122,7 +158,7 @@ Tile::Tile(const Tile& other, int _textureID, bool _block)
     wet = false;
 }
 
-void Tile::Draw(Texture2D tileSet, int playerX, int playerY, int screenWidth, int screenHeight) 
+void Tile::Draw(Texture2D tileSet, int playerX, int playerY, int screenWidth, int screenHeight, std::vector<int> mudCode)
 { 
     if (wet)
     {
@@ -135,6 +171,26 @@ void Tile::Draw(Texture2D tileSet, int playerX, int playerY, int screenWidth, in
     Vector2 destVec = { 32 , 32 };
     float rotation = textureID.GetRotation();
     DrawTexturePro(tileSet, sourceRec, destinationRec, destVec, rotation, WHITE);
+
+    if (wet)
+    {
+        for (int i = 0; i < 8; i++)
+        {
+            int thisMudCode = mudCode[i];
+            if ((thisMudCode != 0) && (edgeTable.count(thisMudCode)))
+            {
+                //std::cout << edgeTable.count(288) << std::endl;
+                //std::cout << thisMudCode << std::endl;
+                float mudSx = (edgeTable[mudCode[i]].GetID() % 15) * TILE_SPRITE_SIZE;
+                float mudSy = (int)(edgeTable[mudCode[i]].GetID() / 15) * TILE_SPRITE_SIZE;
+                Rectangle mudSourceRec = { mudSx, mudSy, TILE_SPRITE_SIZE, TILE_SPRITE_SIZE };
+                DrawTexturePro(tileSet, mudSourceRec, destinationRec, destVec, edgeTable[mudCode[i]].GetRotation(), WHITE);
+            }
+            
+        }
+
+    }
+        
     //std::cout << "Tile code at (" << col << ", " << row << "): " << thisCode << std::endl;
 }
 
@@ -228,7 +284,7 @@ Tile* DirtTile::Interact(int item)
     case 1: //axe
         break;
     case 2: //water
-        ////wet = true;
+        wet = true; 
         break;
     }
     return this;

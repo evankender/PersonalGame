@@ -38,30 +38,30 @@ void setupWindow()
 
 void HandleInput()
 {
-    if (IsKeyDown(KEY_D)) player.move(1, 0);
-    if (IsKeyDown(KEY_A)) player.move(-1, 0);
-    if (IsKeyDown(KEY_W)) player.move(0, -1);
-    if (IsKeyDown(KEY_S)) player.move(0, 1);
+	if (IsKeyDown(KEY_D)) player.move(1, 0);
+	if (IsKeyDown(KEY_A)) player.move(-1, 0);
+	if (IsKeyDown(KEY_W)) player.move(0, -1);
+	if (IsKeyDown(KEY_S)) player.move(0, 1);
 
-    switch (GetKeyPressed())
-    {
-    case KEY_ONE:
-        hotbar.UpdateSelSlot(0);
-        break;
-    case KEY_TWO:
-        hotbar.UpdateSelSlot(1);
-        break;
-    case KEY_THREE:
-        hotbar.UpdateSelSlot(2);
-        break;
-    case KEY_FOUR:
-        hotbar.UpdateSelSlot(3);
-        break;
-    case KEY_FIVE:
-        hotbar.UpdateSelSlot(4);
-        break;
-    }
-    return;
+	switch (GetKeyPressed())
+	{
+	case KEY_ONE:
+		hotbar.UpdateSelSlot(0);
+		break;
+	case KEY_TWO:
+		hotbar.UpdateSelSlot(1);
+		break;
+	case KEY_THREE:
+		hotbar.UpdateSelSlot(2);
+		break;
+	case KEY_FOUR:
+		hotbar.UpdateSelSlot(3);
+		break;
+	case KEY_FIVE:
+		hotbar.UpdateSelSlot(4);
+		break;
+	}
+	return;
 }
 
 
