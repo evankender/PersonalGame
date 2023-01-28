@@ -6,43 +6,66 @@ Player::Player(TileMap &tileMap) {
     playerX = (TILE_SIZE * (MAP_WIDTH / 2));
     playerY = (TILE_SIZE * (MAP_HEIGHT / 2));
     sourceRec = { 0, 0, 64, 64 };
-    destVec = { 64 , 64 };
+    originVec = { 64 , 64 };
     mapPtr = &tileMap;
     playerSpeed = 1.0f;
 }
 
-void Player::move(int dx, int dy) {
+void Player::Move(int dx, int dy) {
 
-    int newX = playerX + (dx * playerSpeed);
-    int newY = playerY + (dy * playerSpeed);
-    int playerCol = (newX + 30) / TILE_SIZE;
-    int playerRow = (newY + 50) / TILE_SIZE;
+    const int newX = playerX + (int)(dx * playerSpeed);
+    const int newY = playerY + (int)(dy * playerSpeed);
   
-    if (!mapPtr->CheckBlocked(playerRow, playerCol))
+    if (!mapPtr->CheckBlocked(GetRow(newY), GetCol(newX)))
     {
         playerX = newX;
         playerY = newY;
     }
     else
     {
-        playerX = playerX - (dx * (playerSpeed / 2));
-        playerY = playerY - (dy * (playerSpeed / 2));
+        playerX = playerX - (int)(dx * (playerSpeed));
+        playerY = playerY - (int)(dy * (playerSpeed));
 
     }
-
 }
 
 void Player::DrawPlayer(int screenWidth, int screenHeight, Texture2D playerSprite)
 {
-    Rectangle destinationRec = { screenWidth / 2, screenHeight / 2, 128, 128 };
-    DrawTexturePro(playerSprite, sourceRec, destinationRec, destVec, 0.0f, WHITE);
+
+    DrawTexturePro(playerSprite, sourceRec, { (float)screenWidth / 2.0f, (float)screenHeight / 2.0f, 128.0f, 128.0f }, originVec, 0.0f, WHITE);
 }
 
 void Player::UpdateSpeed()
 {
+    playerSpeed = mapPtr->GetTileSpeed(GetRow(), GetCol());
+}
 
-    int playerCol = (playerX + 32) / TILE_SIZE;
-    int playerRow = (playerY + 50) / TILE_SIZE;
+int Player::GetX()
+{
+    return playerX;
+}
 
-    playerSpeed = mapPtr->GetTileSpeed(playerRow, playerCol);
+int Player::GetY()
+{
+    return playerY;
+}
+
+int Player::GetCol()
+{
+    return ((playerX + 32) / TILE_SIZE);
+}
+
+int Player::GetRow()
+{
+    return ((playerY + 50) / TILE_SIZE);
+}
+
+int Player::GetCol(int newX)
+{
+    return ((newX + 32) / TILE_SIZE);
+}
+
+int Player::GetRow(int newY)
+{
+    return ((newY + 50) / TILE_SIZE);
 }

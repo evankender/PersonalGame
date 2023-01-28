@@ -1,10 +1,8 @@
-#include "raylib.h"
-#include <vector>
-
-
 #ifndef TILE_H
 #define TILE_H
 
+#include "raylib.h"
+#include <vector>
 
 const int TILE_SPRITE_SIZE = 32;
 const int TILE_SPRITE_MAP_WIDTH = TILE_SPRITE_SIZE * 15;
@@ -30,10 +28,11 @@ public:
     Tile();
     Tile(int x, int y, int textureID, bool block);
     Tile(const Tile& other, int textureID, bool block);
+    virtual void Draw(Texture2D tileSet, int playerX, int playerY, int screenWidth, int screenHeight);
     virtual void Draw(Texture2D tileSet, int playerX, int playerY, int screenWidth, int screenHeight, std::vector<int> mudCode);
     void SetTextureID(int textureID);
     void SetTextureID(int textureID, float rotation);
-    void Tile::SetTextureID(TileID tileID);
+    void SetTextureID(TileID tileID);
     int GetTextureID();
     float GetIDRotation();
     void SetObjectID(int objectID);
@@ -43,18 +42,20 @@ public:
     virtual int GetType();
     void SetCode(unsigned int newCode);
     virtual void CodeToID(unsigned int Code);
-    bool wet;
+    bool IsWet();
+    void WetTile();
 private:
-    bool block;
+    int x;
+    int y;
     TileID textureID;
+    bool block;
     float tileSpeed;
     Rectangle sourceRec;
     Rectangle objectSourceRec;
     int objectID;
-    int x;
-    int y;
     unsigned int code;
-    
+    bool wet;
+    Vector2 originVec;
 };
 
 class DirtTile : public Tile {
@@ -62,7 +63,6 @@ public:
     DirtTile(int x, int y);
     DirtTile(const Tile& other);
     virtual Tile* Interact(int item);
-    void WetTile();
     virtual int GetType();
     void CodeToID(unsigned int code);
 private:

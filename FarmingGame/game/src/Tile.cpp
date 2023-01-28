@@ -5,6 +5,7 @@
 #include <iostream>
 using namespace std;
 
+
 TileID::TileID()
 {
     id = -1;
@@ -136,12 +137,10 @@ Tile::Tile(int _x, int _y, int _textureID, bool _block)
     textureID = TileID(_textureID, 0.0f);
     block = _block;
     tileSpeed = 5.0f;
-
-    float sx = (textureID.GetID() % 15) * TILE_SPRITE_SIZE;
-    float sy = (int)(textureID.GetID() / 15) * TILE_SPRITE_SIZE;
-    sourceRec = { sx, sy, TILE_SPRITE_SIZE, TILE_SPRITE_SIZE };
+    sourceRec = { (float)((textureID.GetID() % 15) * TILE_SPRITE_SIZE), (float)((int)(textureID.GetID() / 15) * TILE_SPRITE_SIZE), TILE_SPRITE_SIZE, TILE_SPRITE_SIZE };
     code = -1;
     wet = false;
+    originVec = { TILE_SIZE / 2, TILE_SIZE / 2 };
 }
 
 Tile::Tile(const Tile& other, int _textureID, bool _block)
@@ -151,71 +150,56 @@ Tile::Tile(const Tile& other, int _textureID, bool _block)
     textureID = TileID(_textureID, 0.0f);
     block =_block;
     tileSpeed = 5.0f;
-    float sx = (textureID.GetID() % 15) * TILE_SPRITE_SIZE;
-    float sy = (int)(textureID.GetID() / 15) * TILE_SPRITE_SIZE;
-    sourceRec = { sx, sy, TILE_SPRITE_SIZE, TILE_SPRITE_SIZE };
+    sourceRec = { (float)((textureID.GetID() % 15) * TILE_SPRITE_SIZE), (float)((int)(textureID.GetID() / 15) * TILE_SPRITE_SIZE), TILE_SPRITE_SIZE, TILE_SPRITE_SIZE };
     code = -1;
     wet = false;
+    originVec = { TILE_SIZE / 2, TILE_SIZE / 2 };
+}
+
+void Tile::Draw(Texture2D tileSet, int playerX, int playerY, int screenWidth, int screenHeight)
+{ 
+    DrawTexturePro(tileSet, sourceRec, { (float)((x * TILE_SIZE) - (playerX - screenWidth / 2)),(float)((y * TILE_SIZE) - (playerY - screenHeight / 2)), TILE_SIZE, TILE_SIZE }, originVec, textureID.GetRotation(), WHITE);
 }
 
 void Tile::Draw(Texture2D tileSet, int playerX, int playerY, int screenWidth, int screenHeight, std::vector<int> mudCode)
-{ 
+{
     if (wet)
     {
-        float sx = (textureID.GetID() % 15) * TILE_SPRITE_SIZE;
-        float sy = (int)(textureID.GetID() / 15) * TILE_SPRITE_SIZE;
-        sourceRec = { sx, sy+32, TILE_SPRITE_SIZE, TILE_SPRITE_SIZE };
-    }
+        Rectangle destinationRec = { (float)((x * TILE_SIZE) - (playerX - screenWidth / 2)), (float)((y * TILE_SIZE) - (playerY - screenHeight / 2)), TILE_SIZE, TILE_SIZE };
 
-    Rectangle destinationRec = { ((x * TILE_SIZE) - (playerX - screenWidth / 2)), (y * TILE_SIZE) - (playerY - screenHeight / 2), TILE_SIZE, TILE_SIZE };
-    Vector2 destVec = { 32 , 32 };
-    float rotation = textureID.GetRotation();
-    DrawTexturePro(tileSet, sourceRec, destinationRec, destVec, rotation, WHITE);
+        DrawTexturePro(tileSet, { (float)(textureID.GetID() % 15) * TILE_SPRITE_SIZE, (float)((int)(textureID.GetID() / 15) * TILE_SPRITE_SIZE) + TILE_SPRITE_SIZE, TILE_SPRITE_SIZE, TILE_SPRITE_SIZE }, destinationRec, originVec, textureID.GetRotation() , WHITE);
 
-    if (wet)
-    {
         for (int i = 0; i < 8; i++)
         {
-            int thisMudCode = mudCode[i];
-            if ((thisMudCode != 0) && (edgeTable.count(thisMudCode)))
+            if ((mudCode[i] != 0) && (edgeTable.count(mudCode[i])))
             {
-                //std::cout << edgeTable.count(288) << std::endl;
-                //std::cout << thisMudCode << std::endl;
-                float mudSx = (edgeTable[mudCode[i]].GetID() % 15) * TILE_SPRITE_SIZE;
-                float mudSy = (int)(edgeTable[mudCode[i]].GetID() / 15) * TILE_SPRITE_SIZE;
-                Rectangle mudSourceRec = { mudSx, mudSy, TILE_SPRITE_SIZE, TILE_SPRITE_SIZE };
-                DrawTexturePro(tileSet, mudSourceRec, destinationRec, destVec, edgeTable[mudCode[i]].GetRotation(), WHITE);
+                DrawTexturePro(tileSet, { (float)((edgeTable[mudCode[i]].GetID() % 15) * TILE_SPRITE_SIZE), (float)((int)(edgeTable[mudCode[i]].GetID() / 15) * TILE_SPRITE_SIZE), TILE_SPRITE_SIZE, TILE_SPRITE_SIZE }, destinationRec, originVec, edgeTable[mudCode[i]].GetRotation(), WHITE);
             }
-            
-        }
 
+        }
     }
-        
-    //std::cout << "Tile code at (" << col << ", " << row << "): " << thisCode << std::endl;
+    else Draw(tileSet, playerX, playerY, screenWidth, screenHeight);
 }
+
 
 void Tile::SetTextureID(int newtextureID)
 {
     textureID = TileID(newtextureID, 0);
-    float sx = (textureID.GetID() % 15) * TILE_SPRITE_SIZE;
-    float sy = (int)(textureID.GetID() / 15) * TILE_SPRITE_SIZE;
-    sourceRec = { sx, sy, TILE_SPRITE_SIZE, TILE_SPRITE_SIZE };
+    sourceRec = { (float)((textureID.GetID() % 15) * TILE_SPRITE_SIZE), (float)((int)(textureID.GetID() / 15) * TILE_SPRITE_SIZE), TILE_SPRITE_SIZE, TILE_SPRITE_SIZE };
+
 }
 
 void Tile::SetTextureID(int newtextureID, float rotation)
 {
     textureID = TileID(newtextureID, rotation);
-    float sx = (textureID.GetID() % 15) * TILE_SPRITE_SIZE;
-    float sy = (int)(textureID.GetID() / 15) * TILE_SPRITE_SIZE;
-    sourceRec = { sx, sy, TILE_SPRITE_SIZE, TILE_SPRITE_SIZE };
+    sourceRec = { (float)((textureID.GetID() % 15) * TILE_SPRITE_SIZE), (float)((int)(textureID.GetID() / 15) * TILE_SPRITE_SIZE), TILE_SPRITE_SIZE, TILE_SPRITE_SIZE };
+
 }
 
 void Tile::SetTextureID(TileID tileID)
 {
     textureID = tileID;
-    float sx = (textureID.GetID() % 15) * TILE_SPRITE_SIZE;
-    float sy = (int)(textureID.GetID() / 15) * TILE_SPRITE_SIZE;
-    sourceRec = { sx, sy, TILE_SPRITE_SIZE, TILE_SPRITE_SIZE };
+    sourceRec = { (float)((textureID.GetID() % 15) * TILE_SPRITE_SIZE), (float)((int)(textureID.GetID() / 15) * TILE_SPRITE_SIZE), TILE_SPRITE_SIZE, TILE_SPRITE_SIZE };
 }
 
 int Tile::GetTextureID()
@@ -263,15 +247,27 @@ void Tile::CodeToID(unsigned int _code)
     SetTextureID(blobTable[code]);
 }
 
+bool Tile::IsWet()
+{
+    return wet;
+}
+
+void Tile::WetTile()
+{
+    wet = true;
+}
+
 
 DirtTile::DirtTile(int x, int y)
     : Tile(x, y, DRY_DIRT, false)
 {
+    waterTicks = 0;
 }
 
 DirtTile::DirtTile(const Tile& other)
     : Tile(other, DRY_DIRT, false)
 {
+    waterTicks = 0;
 }
 
 Tile* DirtTile::Interact(int item)
@@ -279,25 +275,20 @@ Tile* DirtTile::Interact(int item)
     switch (item)
     {
     case 0: //hoe
-        return new WaterTile(*this);
         break;
     case 1: //axe
         break;
     case 2: //water
-        wet = true; 
+        WetTile();
         break;
     }
     return this;
 }
 
-void DirtTile::WetTile()
-{
-    //wet = true;
-}
-
 int DirtTile::GetType()
 {
-    return 1;
+    if (IsWet()) return 4;
+    return 2;
 }
 
 void DirtTile::CodeToID(unsigned int _code)
@@ -324,7 +315,7 @@ Tile* GrassTile::Interact(int item)
 
 int GrassTile::GetType()
 {
-    return 2;
+    return 1;
 }
 
 void GrassTile::CodeToID(unsigned int code)

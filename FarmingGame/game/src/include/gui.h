@@ -1,11 +1,12 @@
-#include "raylib.h"
+#ifndef GUI_H
+#define GUI_H
 
 class GUI {
 public:
 	GUI();
+private:
 	int screenWidth;
 	int screenHeight;
-private:
 };
 
 class Hotbar : public GUI {
@@ -19,3 +20,5 @@ private:
 	int selSlot;
 	int itemSize;
 };
+
+#endif

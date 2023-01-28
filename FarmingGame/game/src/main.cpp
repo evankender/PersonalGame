@@ -1,3 +1,4 @@
+
 #include <raylib.h>
 #include <raymath.h>
 #include "include/tile.h"
@@ -7,18 +8,21 @@
 #include <cstdlib>
 #include <cstdio>
 
+#define RAYGUI_IMPLEMENTATION
+#include "include/raygui.h"
+
 Image tilemap;
 Texture2D tileset;
 
 Image playerImg;
 Texture2D playerSprite;
 
-int screenWidth = 1600;
-int screenHeight = 900;
-
 TileMap tileMap;
 Player player(tileMap);
 Hotbar hotbar(5);
+
+int screenWidth = 1600;
+int screenHeight = 900;
 
 void loadTextures()
 {
@@ -38,10 +42,10 @@ void setupWindow()
 
 void HandleInput()
 {
-	if (IsKeyDown(KEY_D)) player.move(1, 0);
-	if (IsKeyDown(KEY_A)) player.move(-1, 0);
-	if (IsKeyDown(KEY_W)) player.move(0, -1);
-	if (IsKeyDown(KEY_S)) player.move(0, 1);
+	if (IsKeyDown(KEY_D)) player.Move(1, 0);
+	if (IsKeyDown(KEY_A)) player.Move(-1, 0);
+	if (IsKeyDown(KEY_W)) player.Move(0, -1);
+	if (IsKeyDown(KEY_S)) player.Move(0, 1);
 
 	switch (GetKeyPressed())
 	{
@@ -64,7 +68,6 @@ void HandleInput()
 	return;
 }
 
-
 int main()
 {
     // Initialize window
@@ -84,7 +87,8 @@ int main()
         HandleInput();
        
         BeginDrawing();
-        tileMap.Draw(player.playerX, player.playerY, tileset, hotbar.GetSelSlot());
+        tileMap.Draw(player, tileset, hotbar.GetSelSlot());
+        DrawFPS(0, 0);
 
         player.UpdateSpeed();
         player.DrawPlayer(screenWidth, screenHeight, playerSprite);
