@@ -128,31 +128,32 @@ unordered_map<int, TileID> edgeTable = {  //inserting element directly in map
 
 };
 
-Tile::Tile() : Tile(1, 1, 31, false) {}
+Tile::Tile() : Tile(1, 1, 31) {}
 
-Tile::Tile(int _x, int _y, int _textureID, bool _block) 
+Tile::Tile(int _x, int _y, int _textureID) 
 {
     x = _x;
     y = _y;
     textureID = TileID(_textureID, 0.0f);
-    block = _block;
-    tileSpeed = 5.0f;
     sourceRec = { (float)((textureID.GetID() % 15) * TILE_SPRITE_SIZE), (float)((int)(textureID.GetID() / 15) * TILE_SPRITE_SIZE), TILE_SPRITE_SIZE, TILE_SPRITE_SIZE };
-    code = -1;
-    wet = false;
     originVec = { TILE_SIZE / 2, TILE_SIZE / 2 };
 }
 
-Tile::Tile(const Tile& other, int _textureID, bool _block)
+Tile::Tile(const Tile& other, int _textureID)
 {
     x = other.x;
     y = other.y;
     textureID = TileID(_textureID, 0.0f);
-    block =_block;
-    tileSpeed = 5.0f;
     sourceRec = { (float)((textureID.GetID() % 15) * TILE_SPRITE_SIZE), (float)((int)(textureID.GetID() / 15) * TILE_SPRITE_SIZE), TILE_SPRITE_SIZE, TILE_SPRITE_SIZE };
-    code = -1;
-    wet = false;
+    originVec = { TILE_SIZE / 2, TILE_SIZE / 2 };
+}
+
+Tile::Tile(int _x, int _y, int _textureID, Rectangle _sourceRec)
+{
+    x = _x;
+    y = _y;
+    sourceRec = _sourceRec;
+    textureID = TileID(_textureID, 0.0f);
     originVec = { TILE_SIZE / 2, TILE_SIZE / 2 };
 }
 
@@ -212,20 +213,6 @@ float Tile::GetIDRotation()
     return textureID.GetRotation();
 }
 
-void Tile::SetObjectID(int newobjectID)
-{
-}
-
-bool Tile::BlockState()
-{
-    return block;
-}
-
-float Tile::TileSpeed()
-{
-    return tileSpeed;
-}
-
 Tile* Tile::Interact(int item)
 {
     return this;
@@ -236,116 +223,8 @@ int Tile::GetType()
     return 0;
 }
 
-void Tile::SetCode(unsigned int newCode)
-{
-    code = newCode;
-}
-
 void Tile::CodeToID(unsigned int _code)
 {
-    code = _code;
     SetTextureID(blobTable[code]);
 }
-
-bool Tile::IsWet()
-{
-    return wet;
-}
-
-void Tile::WetTile()
-{
-    wet = true;
-}
-
-
-DirtTile::DirtTile(int x, int y)
-    : Tile(x, y, DRY_DIRT, false)
-{
-    waterTicks = 0;
-}
-
-DirtTile::DirtTile(const Tile& other)
-    : Tile(other, DRY_DIRT, false)
-{
-    waterTicks = 0;
-}
-
-Tile* DirtTile::Interact(int item)
-{
-    switch (item)
-    {
-    case 0: //hoe
-        break;
-    case 1: //axe
-        break;
-    case 2: //water
-        WetTile();
-        break;
-    }
-    return this;
-}
-
-int DirtTile::GetType()
-{
-    if (IsWet()) return 4;
-    return 2;
-}
-
-void DirtTile::CodeToID(unsigned int _code)
-{
-    SetCode(_code);
-    SetTextureID(blobTable[_code]);
-}
-
-
-GrassTile::GrassTile(int x, int y)
-    : Tile(x, y, GRASS, false)
-{
-}
-
-GrassTile::GrassTile(const Tile& other)
-    : Tile(other, GRASS, false)
-{
-}
-
-Tile* GrassTile::Interact(int item)
-{
-    return new DirtTile(*this);
-}
-
-int GrassTile::GetType()
-{
-    return 1;
-}
-
-void GrassTile::CodeToID(unsigned int code)
-{
-}
-
-WaterTile::WaterTile(int x, int y)
-    : Tile(x, y, WATER, true)
-{
-}
-
-WaterTile::WaterTile(const Tile& other)
-    : Tile(other, WATER, true)
-{
-}
-
-
-Tile* WaterTile::Interact(int item)
-{
-    return this;
-}
-
-int WaterTile::GetType()
-{
-    return 5;
-}
-
-void WaterTile::CodeToID(unsigned int code)
-{
-}
-
-
 

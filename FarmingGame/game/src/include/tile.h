@@ -2,6 +2,7 @@
 #define TILE_H
 
 #include "raylib.h"
+#include "include/object.h"
 #include <vector>
 
 const int TILE_SPRITE_SIZE = 32;
@@ -11,6 +12,8 @@ const int DRY_DIRT = 0;
 const int GRASS = 31;
 const int WATER = 30;
 const int WATER_TICKS = 60;
+
+class Object;
 
 class TileID {
 public:
@@ -26,67 +29,27 @@ private:
 class Tile {
 public:
     Tile();
-    Tile(int x, int y, int textureID, bool block);
-    Tile(const Tile& other, int textureID, bool block);
-    virtual void Draw(Texture2D tileSet, int playerX, int playerY, int screenWidth, int screenHeight);
-    virtual void Draw(Texture2D tileSet, int playerX, int playerY, int screenWidth, int screenHeight, std::vector<int> mudCode);
+    Tile(int x, int y, int textureID);
+    Tile(const Tile& other, int textureID);
+    Tile(int x, int y, int textureID, Rectangle sourceRec);
+    void Draw(Texture2D tileSet, int playerX, int playerY, int screenWidth, int screenHeight);
+    void Draw(Texture2D tileSet, int playerX, int playerY, int screenWidth, int screenHeight, std::vector<int> mudCode);
     void SetTextureID(int textureID);
     void SetTextureID(int textureID, float rotation);
     void SetTextureID(TileID tileID);
     int GetTextureID();
     float GetIDRotation();
-    void SetObjectID(int objectID);
-    bool BlockState();
-    float TileSpeed();
-    virtual Tile* Interact(int item);
-    virtual int GetType();
-    void SetCode(unsigned int newCode);
-    virtual void CodeToID(unsigned int Code);
-    bool IsWet();
-    void WetTile();
+    Tile* Interact(int item);
+    int GetType();
+    void CodeToID(unsigned int Code);
 private:
     int x;
     int y;
-    TileID textureID;
-    bool block;
-    float tileSpeed;
     Rectangle sourceRec;
-    Rectangle objectSourceRec;
-    int objectID;
     unsigned int code;
     bool wet;
     Vector2 originVec;
-};
-
-class DirtTile : public Tile {
-public:
-    DirtTile(int x, int y);
-    DirtTile(const Tile& other);
-    virtual Tile* Interact(int item);
-    virtual int GetType();
-    void CodeToID(unsigned int code);
-private:
-    int waterTicks;
-};
-
-class GrassTile : public Tile {
-public:
-    GrassTile(int x, int y);
-    GrassTile(const Tile& other);
-    virtual Tile* Interact(int item);
-    virtual int GetType();
-    void CodeToID(unsigned int code);
-private:
-};
-
-class WaterTile : public Tile {
-public:
-    WaterTile(int x, int y);
-    WaterTile(const Tile& other);
-    virtual Tile* Interact(int item);
-    virtual int GetType();
-    void CodeToID(unsigned int code);
-private:
+    TileID textureID;
 };
 
 #endif

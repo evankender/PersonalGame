@@ -7,6 +7,7 @@
 #include "include/gui.h"
 #include <cstdlib>
 #include <cstdio>
+//#include "include/tileson.hpp"
 
 #define RAYGUI_IMPLEMENTATION
 #include "include/raygui.h"
@@ -17,7 +18,7 @@ Texture2D tileset;
 Image playerImg;
 Texture2D playerSprite;
 
-TileMap tileMap;
+TileMap tileMap = TileMap();
 Player player(tileMap);
 Hotbar hotbar(5);
 
@@ -26,7 +27,8 @@ int screenHeight = 900;
 
 void loadTextures()
 {
-    tilemap = LoadImage("resources/Tiles/blob.png");
+    //tilemap = LoadImage("resources/Tiles/blob.png");
+    tilemap = LoadImage("resources/terrain.png");
     tileset = LoadTextureFromImage(tilemap);
 
     playerImg = LoadImage("resources/player.png");
@@ -75,6 +77,8 @@ int main()
     
     // Load tilemap image
     loadTextures();
+
+
     
     // Main game loop
     while (!WindowShouldClose()) {
@@ -84,13 +88,14 @@ int main()
             screenHeight = GetScreenHeight();
         }
 
+
         HandleInput();
        
         BeginDrawing();
         tileMap.Draw(player, tileset, hotbar.GetSelSlot());
         DrawFPS(0, 0);
 
-        player.UpdateSpeed();
+        //player.UpdateSpeed();
         player.DrawPlayer(screenWidth, screenHeight, playerSprite);
         hotbar.Draw();
 

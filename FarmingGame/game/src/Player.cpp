@@ -8,7 +8,7 @@ Player::Player(TileMap &tileMap) {
     sourceRec = { 0, 0, 64, 64 };
     originVec = { 64 , 64 };
     mapPtr = &tileMap;
-    playerSpeed = 1.0f;
+    playerSpeed = 5.0f;
 }
 
 void Player::Move(int dx, int dy) {
