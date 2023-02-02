@@ -128,7 +128,7 @@ unordered_map<int, TileID> edgeTable = {  //inserting element directly in map
 
 };
 
-Tile::Tile() : Tile(1, 1, 31) {}
+Tile::Tile() : Tile(1, 1, 1) {}
 
 Tile::Tile(int _x, int _y, int _textureID) 
 {
@@ -186,21 +186,21 @@ void Tile::Draw(Texture2D tileSet, int playerX, int playerY, int screenWidth, in
 void Tile::SetTextureID(int newtextureID)
 {
     textureID = TileID(newtextureID, 0);
-    sourceRec = { (float)((textureID.GetID() % 15) * TILE_SPRITE_SIZE), (float)((int)(textureID.GetID() / 15) * TILE_SPRITE_SIZE), TILE_SPRITE_SIZE, TILE_SPRITE_SIZE };
+    SetTextureID(textureID);
 
 }
 
 void Tile::SetTextureID(int newtextureID, float rotation)
 {
     textureID = TileID(newtextureID, rotation);
-    sourceRec = { (float)((textureID.GetID() % 15) * TILE_SPRITE_SIZE), (float)((int)(textureID.GetID() / 15) * TILE_SPRITE_SIZE), TILE_SPRITE_SIZE, TILE_SPRITE_SIZE };
+    SetTextureID(textureID);
 
 }
 
 void Tile::SetTextureID(TileID tileID)
 {
     textureID = tileID;
-    sourceRec = { (float)((textureID.GetID() % 15) * TILE_SPRITE_SIZE), (float)((int)(textureID.GetID() / 15) * TILE_SPRITE_SIZE), TILE_SPRITE_SIZE, TILE_SPRITE_SIZE };
+    sourceRec = { (float)((textureID.GetID() % 21) * TILE_SPRITE_SIZE), (float)((int)(textureID.GetID() / 21) * TILE_SPRITE_SIZE), TILE_SPRITE_SIZE, TILE_SPRITE_SIZE };
 }
 
 int Tile::GetTextureID()
@@ -225,6 +225,15 @@ int Tile::GetType()
 
 void Tile::CodeToID(unsigned int _code)
 {
-    SetTextureID(blobTable[code]);
+    SetTextureID(blobTable[_code]);
 }
 
+int Tile::getX()
+{
+    return x;
+}
+
+int Tile::getY()
+{
+    return y;
+}

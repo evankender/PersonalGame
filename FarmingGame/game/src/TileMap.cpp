@@ -18,13 +18,17 @@ unordered_map<std::string, int> LayersMap =
     {"Paths", 2},
     {"Buildings", 3},
     {"Back", 4},
-    {"Collisions", 5}
 };
 
 TileMap::TileMap()
 {
+}
+
+TileMap::TileMap(std::string mapLocation)
+{
+    const char* c = mapLocation.c_str();
     tson::Tileson t;
-    std::unique_ptr<tson::Map> mapData = t.parse(fs::path("resources/farmmap.tmj"));
+    std::unique_ptr<tson::Map> mapData = t.parse(fs::path(TextFormat("resources/maps/%s", c)));
 
     tileMap.resize(MAP_HEIGHT);
     for (int r = 0; r < MAP_HEIGHT; r++)
@@ -53,15 +57,27 @@ TileMap::TileMap()
                 for (auto& obj : layer.getObjects())
                 {
                     tson::Vector2i position = obj.getPosition();
-                    Object* newObj = new Object();
+                    tson::Vector2i size = obj.getSize();
+                    std::any blocked = false;
+                    std::any exit = -1;
 
-                    if (LayersMap[layer.getName()] == 5)
+
+                    if (obj.getProperties().hasProperty("block"))
                     {
-                        newObj = new Object(true);
+                        blocked = obj.getProperties().getProperty("block");
                     }
 
-                    int tileY = position.y / (32);
-                    int tileX = position.x / (32);
+                    if (obj.getProperties().hasProperty("exit"))
+                    {
+                        exit = obj.getProperties().getProperty("exit")->getValue();
+
+                    }
+              
+                    Object* newObj = new Object(position.x, position.y, size.x, size.y, std::any_cast<bool>(blocked), std::any_cast<int>(exit));
+
+                    int tileY = position.y / (TILE_SPRITE_SIZE);
+                    int tileX = position.x / (TILE_SPRITE_SIZE);
+
                     tileMap[tileY][tileX]->setObj(newObj, LayersMap[layer.getName()]);
                 }
 
@@ -76,6 +92,8 @@ TileMap::TileMap()
                     if (tile != nullptr)
                     {
                         int tileID = tile->getId();
+
+                        
                         tson::Rect srcRectJson = tile->getDrawingRect();
                         tson::Vector2i position = tileObject.getPositionInTileUnits();
 
@@ -93,22 +111,28 @@ TileMap::TileMap()
 
         }
     }
-
-
 }
 
 
 TileMap::~TileMap() 
 {
+    for (int r = 0; r < MAP_HEIGHT; r++)
+    {
+        for (int c = 0; c < MAP_WIDTH; c++)
+        {
+            //delete(tileMap[r][c]);
+        }
+    }
 }
 
 
-void TileMap::Draw(Player player, Texture2D tileSet, int selSlot) 
+void TileMap::draw(Player player, Texture2D tileSet, Texture2D playerSprite) 
 {
+
     std::vector<int> mudCode;
 
-    const int mouseX = GetMouseX() + 32;
-    const int mouseY = GetMouseY() + 32;
+    const int mouseX = GetMouseX() + (TILE_SIZE/2);
+    const int mouseY = GetMouseY() + (TILE_SIZE / 2);
 
     const int playerX = player.GetX();
     const int playerY = player.GetY();
@@ -126,7 +150,7 @@ void TileMap::Draw(Player player, Texture2D tileSet, int selSlot)
     const int tileHeight = screenHeight / TILE_SIZE;
 
     int colStart = (playerCol - (tileWidth / 2)) - 1;
-    int rowStart = (playerRow - (tileHeight / 2)) - 1;
+    int rowStart = (playerRow - (tileHeight / 2)) - 2;
 
     int colEnd = (playerCol + (tileWidth / 2)) + 2;
     int rowEnd = (playerRow + (tileHeight / 2)) + 2;
@@ -158,7 +182,6 @@ void TileMap::Draw(Player player, Texture2D tileSet, int selSlot)
     {
         for (col = colStart; col < colEnd; col++)
         {
-            //tileMap[row][col]->pathTile->CodeToID(GetPathCode(row, col));
 
             //if (tileMap[row][col]->pathObj->IsWet()) GetTileCodeMud(row, col, mudCode);
 
@@ -169,6 +192,7 @@ void TileMap::Draw(Player player, Texture2D tileSet, int selSlot)
             buidlingTile->Draw(tileSet, playerX, playerY, screenWidth, screenHeight);
 
             Tile* pathTile = tileMap[row][col]->getTile(2);
+            pathTile->CodeToID(GetPathCode(row, col));
             pathTile->Draw(tileSet, playerX, playerY, screenWidth, screenHeight);
 
             Tile* frontTile = tileMap[row][col]->getTile(1);
@@ -177,42 +201,143 @@ void TileMap::Draw(Player player, Texture2D tileSet, int selSlot)
             Tile* alwaysFrontTile = tileMap[row][col]->getTile(0);
             alwaysFrontTile->Draw(tileSet, playerX, playerY, screenWidth, screenHeight);
 
+     
+            if (((screenHeight/2)/TILE_SIZE == (row - rowStart)-3) && ((screenWidth / 2)/TILE_SIZE == (col - colStart)-2))
+             {
+                    player.DrawPlayer(screenWidth, screenHeight, playerSprite);
 
+                    frontTile = tileMap[row-1][col]->getTile(1);
+                    frontTile->Draw(tileSet, playerX, playerY, screenWidth, screenHeight);
 
-            if ((col >= playerCol - 1 && col <= playerCol + 1) && (row >= playerRow - 1 && row <= playerRow + 1)) 
+                    frontTile = tileMap[row-1][col+1]->getTile(1);
+                    frontTile->Draw(tileSet, playerX, playerY, screenWidth, screenHeight);
+
+                    frontTile = tileMap[row-1][col - 1]->getTile(1);
+                    frontTile->Draw(tileSet, playerX, playerY, screenWidth, screenHeight);
+
+                    alwaysFrontTile = tileMap[row-1][col - 1]->getTile(0);
+                    alwaysFrontTile->Draw(tileSet, playerX, playerY, screenWidth, screenHeight);
+
+                    alwaysFrontTile = tileMap[row-1][col + 1]->getTile(0);
+                    alwaysFrontTile->Draw(tileSet, playerX, playerY, screenWidth, screenHeight);
+
+                    alwaysFrontTile = tileMap[row - 2][col]->getTile(0);
+                    alwaysFrontTile->Draw(tileSet, playerX, playerY, screenWidth, screenHeight);
+
+                    alwaysFrontTile = tileMap[row - 1][col]->getTile(0);
+                    alwaysFrontTile->Draw(tileSet, playerX, playerY, screenWidth, screenHeight);
+
+                    alwaysFrontTile = tileMap[row - 2][col - 1]->getTile(0);
+                    alwaysFrontTile->Draw(tileSet, playerX, playerY, screenWidth, screenHeight);
+
+                    alwaysFrontTile = tileMap[row - 2][col + 1]->getTile(0);
+                    alwaysFrontTile->Draw(tileSet, playerX, playerY, screenWidth, screenHeight);
+
+                    alwaysFrontTile = tileMap[row - 1][col + 1]->getTile(0);
+                    alwaysFrontTile->Draw(tileSet, playerX, playerY, screenWidth, screenHeight);
+
+                    alwaysFrontTile = tileMap[row - 1][col -1]->getTile(0);
+                    alwaysFrontTile->Draw(tileSet, playerX, playerY, screenWidth, screenHeight);
+
+                    alwaysFrontTile = tileMap[row - 3][col + 1]->getTile(0);
+                    alwaysFrontTile->Draw(tileSet, playerX, playerY, screenWidth, screenHeight);
+
+                    alwaysFrontTile = tileMap[row - 3][col - 1]->getTile(0);
+                    alwaysFrontTile->Draw(tileSet, playerX, playerY, screenWidth, screenHeight);
+
+                    alwaysFrontTile = tileMap[row - 3][col]->getTile(0);
+                    alwaysFrontTile->Draw(tileSet, playerX, playerY, screenWidth, screenHeight);
+            }
+            alwaysFrontTile = tileMap[row][col]->getTile(0);
+            alwaysFrontTile->Draw(tileSet, playerX, playerY, screenWidth, screenHeight);
+
+            if ((mouseCol == col && mouseRow == row) && (playerAdjacent(mouseRow, mouseCol, player)))
             {
-                if ((playerCol == col) && (playerRow == row))
-                {
-
-                    DrawRectanglePro({ (float)(((col * TILE_SIZE) - (playerX - screenWidth / 2))) , (float)(((row * TILE_SIZE) - (playerY - screenHeight / 2))), TILE_SIZE, TILE_SIZE }, {32, 32}, 0.0f, RED);
-                }
-
-                if (mouseCol == col && mouseRow == row) 
-                {
-                    DrawRectangleRoundedLines({ (float)(((col * TILE_SIZE) - (playerX - screenWidth / 2)) - 30) , (float)(((row * TILE_SIZE) - (playerY - screenHeight / 2)) - 30), TILE_SIZE - 5.6f, TILE_SIZE - 5.6f }, .2f, 5, 4.0f, GOLD);
-                    
-                    if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
-                    {
-                       // tileMap[row][col] = tileMap[row][col]->Interact(selSlot);
-                        //SetTile(row, col, tileMap[row][col]->GetType());
-                    }
-                }
-               
+                DrawRectangleRoundedLines({ (float)(((col * TILE_SIZE) - (playerX - screenWidth / 2)) - 30) , (float)(((row * TILE_SIZE) - (playerY - screenHeight / 2)) - 30), TILE_SIZE - 5.6f, TILE_SIZE - 5.6f }, .2f, 5, 4.0f, GOLD);
             }
         }
     }
 }
 
-
-bool TileMap::CheckBlocked(int row, int col)
-{
-    std::cout << tileMap[row][col]->getObj(5)->isBlocked() << endl;
-    return tileMap[row][col]->getObj(5)->isBlocked();
-}
-
 float TileMap::GetTileSpeed(int row, int col)
 {
     return 1;//tileMap[row][col]->TileSpeed();
+}
+
+bool TileMap::playerAdjacent(int row, int col, Player player)
+{
+    int playerCol = player.GetCol();
+    int playerRow = player.GetRow();
+    return ((col >= playerCol - 1 && col <= playerCol + 1) && (row >= playerRow - 1 && row <= playerRow + 1));
+}
+
+bool TileMap::checkAdjacent(int playerRow, int playerCol, Rectangle playerRec, int checkType) //0 is for block 1 is for exit
+{
+    int n = tileMap.size();
+    int m = tileMap.size();
+
+    bool result = false;
+
+    if (tileMap[playerRow][playerCol]->checkCollision(playerRec))
+    {
+        result = true;
+        return result;
+    }
+
+    for (int dRow = (playerRow > 0 ? -1 : 0); dRow <= (playerRow < n ? 1 : 0);
+        ++dRow) 
+    {
+        for (int dCol = (playerCol > 0 ? -1 : 0);
+            dCol <= (playerCol < m ? 1 : 0); ++dCol) 
+        {
+            if (dRow != 0 || dCol != 0) 
+            {
+                if (tileMap[playerRow + dRow][playerCol + dCol]->checkCollision(playerRec))
+                {
+                    result = true;
+                    return result;
+                }
+            }
+        }
+    }
+
+    return result;
+}
+
+signed int TileMap::checkLevelExit(Player player) //0 is for block 1 is for exit
+{
+    int n = tileMap.size();
+    int m = tileMap.size();
+
+    const int playerRow = player.GetRow();
+    const int playerCol = player.GetCol();
+    const Rectangle playerRec = player.getRec();
+
+    int newMap = tileMap[playerRow][playerCol]->checkExit(playerRec);
+
+    if (newMap > -1)
+    {
+        return newMap;
+    }
+
+    for (int dRow = (playerRow > 0 ? -1 : 0); dRow <= (playerRow < n ? 1 : 0);
+        ++dRow)
+    {
+        for (int dCol = (playerCol > 0 ? -1 : 0);
+            dCol <= (playerCol < m ? 1 : 0); ++dCol)
+        {
+            if (dRow != 0 || dCol != 0)
+            {
+                newMap = tileMap[playerRow + dRow][playerCol + dCol]->checkExit(playerRec);
+                if (newMap > -1)
+                {
+                  
+                    return newMap;
+                }
+            }
+        }
+    }
+    return newMap;
 }
 
 unsigned int TileMap::GetPathCode(int y, int x) {
@@ -311,9 +436,9 @@ void TileMap::GetPathCodeMud(int y, int x, std::vector<int>& code)
     }
 }
 
-void TileMap::SetPathTile(int y, int x, int val)
+void TileMap::SetPathTile(int row, int col, int val)
 {
-    edgeMap[(y * 2) + 1][(x * 2) + 1] = val;
+    edgeMap[(row * 2) + 1][(col * 2) + 1] = val;
     UpdateEdge();
     UpdateCorner();
 }
@@ -391,3 +516,14 @@ void TileMap::UpdateCorner()
         }
     }
 }
+
+Tile* TileMap::getTile(int row, int col, int layer)
+{
+    return tileMap[row][col]->getTile(layer);
+}
+
+void TileMap::setTile(Tile* tile, int layer)
+{
+    tileMap[tile->getY()][tile->getX()]->setTile(tile, layer);
+}
+

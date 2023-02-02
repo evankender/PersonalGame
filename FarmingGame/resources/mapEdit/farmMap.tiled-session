@@ -1,0 +1,142 @@
+{
+    "Map/SizeTest": {
+        "height": 4300,
+        "width": 2
+    },
+    "activeFile": "farmmap.tmj",
+    "automapping.whileDrawing": false,
+    "expandedProjectPaths": [
+        "."
+    ],
+    "fileStates": {
+        "": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "#terrain": {
+            "dynamicWrapping": false
+        },
+        ":/automap-tiles.tsx": {
+            "scaleInDock": 1
+        },
+        "farmmap.tmj": {
+            "expandedObjectLayers": [
+                3
+            ],
+            "scale": 0.33,
+            "selectedLayer": 1,
+            "viewCenter": {
+                "x": 1083.3333333333335,
+                "y": 1181.8181818181818
+            }
+        },
+        "farmmap.tmj#terrain": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "farmmap.tmj#tilemap": {
+            "scaleInDock": 1
+        },
+        "farmmap2.tmj": {
+            "expandedObjectLayers": [
+                3
+            ],
+            "scale": 1.5,
+            "selectedLayer": 1,
+            "viewCenter": {
+                "x": 926.3333333333333,
+                "y": 982
+            }
+        },
+        "randomGrass.tmj": {
+            "expandedObjectLayers": [
+                10,
+                7,
+                8,
+                9
+            ],
+            "scale": 2.0984,
+            "selectedLayer": 1,
+            "viewCenter": {
+                "x": 171.79756004574915,
+                "y": 179.18414029736945
+            }
+        },
+        "randomGrass.tmj#terrain": {
+            "scaleInDock": 1
+        },
+        "rule1.tmj": {
+            "scale": 1.5,
+            "selectedLayer": 4,
+            "viewCenter": {
+                "x": 319.33333333333326,
+                "y": 198.66666666666666
+            }
+        },
+        "rule1.tmj#terrain": {
+            "scaleInDock": 1
+        },
+        "terrain.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "tilemap.tsx": {
+            "scaleInDock": 0.8883,
+            "scaleInEditor": 1.5
+        },
+        "treeHitBox.tmj": {
+            "expandedObjectLayers": [
+                5
+            ],
+            "scale": 1.3021,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": 246.90883956685354,
+                "y": 377.0831733353813
+            }
+        },
+        "waterHitBox.tmj": {
+            "scale": 3.397,
+            "selectedLayer": 4,
+            "viewCenter": {
+                "x": 95.2310862525758,
+                "y": 68.00117750956727
+            }
+        },
+        "waterHitBox.tmj#terrain": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "waterHitBox.tmj#tilemap": {
+            "scaleInDock": 1
+        }
+    },
+    "last.exportedFilePath": "C:/PreAlpha/PersonalGame/FarmingGame/resources/maps",
+    "last.imagePath": "C:/PreAlpha/PersonalGame/FarmingGame/resources/mapEdit",
+    "map.height": 64,
+    "map.lastUsedExportFilter": "JSON map files (*.tmj *.json)",
+    "map.lastUsedFormat": "json",
+    "map.width": 64,
+    "openFiles": [
+        "farmmap.tmj",
+        "randomGrass.tmj",
+        "waterHitBox.tmj",
+        "treeHitBox.tmj",
+        "tilemap.tsx",
+        "farmmap2.tmj"
+    ],
+    "project": "farmMap.tiled-project",
+    "property.type": "int",
+    "recentFiles": [
+        "farmmap2.tmj",
+        "tilemap.tsx",
+        "treeHitBox.tmj",
+        "waterHitBox.tmj",
+        "randomGrass.tmj",
+        "farmmap.tmj",
+        "rule1.tmj",
+        "terrain.tsx"
+    ],
+    "tileset.embedInMap": true,
+    "tileset.lastUsedFormat": "tsx"
+}

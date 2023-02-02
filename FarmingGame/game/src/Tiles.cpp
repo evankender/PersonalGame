@@ -1,6 +1,7 @@
 #include "include/object.h"
 #include "include/tile.h"
 #include "include/tiles.h"
+#include "include/player.h"
 
 Tiles::Tiles()
 {
@@ -16,7 +17,21 @@ Tiles::Tiles()
 	pathObj = new Object();
 	buildingObj = new Object();
 	backObj = new Object();
-	collisionObj = new Object();
+
+}
+
+Tiles::~Tiles()
+{
+    delete(alwaysFrontTile);
+    delete(frontTile);
+    delete(pathTile);
+    delete(buildingTile);
+
+    delete(alwaysFrontObj);
+    delete(frontObj);
+    delete(pathObj);
+    delete(buildingObj);
+    delete(backObj);
 }
 
 void Tiles::setTile(Tile* tile, int tileLayer)
@@ -63,7 +78,6 @@ Tile* Tiles::getTile(int tileLayer)
 
     case 4:
         return backTile;
-
     default:
         break;
     }
@@ -90,13 +104,9 @@ void Tiles::setObj(Object* obj, int ObjLayer)
     case 4:
         backObj = obj;
         break;
-    case 5:
-        collisionObj = obj;
-        break;
     default:
         break;
     }
-
 }
 
 Object* Tiles::getObj(int objLayer)
@@ -105,23 +115,67 @@ Object* Tiles::getObj(int objLayer)
     {
     case 0:
         return alwaysFrontObj;
-
     case 1:
         return frontObj;
-
     case 2:
         return pathObj;
-
     case 3:
         return buildingObj;
-
     case 4:
         return backObj;
-
-    case 5:
-        return collisionObj;
-
     default:
         break;
     }
+}
+
+bool Tiles::checkCollision(Rectangle playerRec)
+{
+    bool returnBool = false;
+    if (alwaysFrontObj->checkCollision(playerRec))
+    {
+        returnBool = true;
+    }
+    else if (frontObj->checkCollision(playerRec))
+    {
+        returnBool = true;
+    }
+    else if (pathObj->checkCollision(playerRec))
+    {
+        returnBool = true;
+    }
+    else if (buildingObj->checkCollision(playerRec))
+    {
+        returnBool = true;
+    }
+    else if (backObj->checkCollision(playerRec))
+    {
+        returnBool = true;
+    }
+    return returnBool;
+}
+
+int Tiles::checkExit(Rectangle playerRec)
+{
+    int returnLevel = -1;
+    if (alwaysFrontObj->isExit())
+    {
+        returnLevel = alwaysFrontObj->checkExit(playerRec);
+    }
+    else if (frontObj->isExit())
+    {
+        returnLevel = frontObj->checkExit(playerRec);
+    }
+    else if (pathObj->isExit())
+    {
+        returnLevel = pathObj->checkExit(playerRec);
+    }
+    else if (buildingObj->isExit())
+    {
+        returnLevel = buildingObj->checkExit(playerRec);
+    }
+    else if (backObj->isExit())
+    {
+        returnLevel = backObj->checkExit(playerRec);
+    }
+    return returnLevel;
 }

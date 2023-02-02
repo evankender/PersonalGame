@@ -42,11 +42,12 @@ public:
     Tile* Interact(int item);
     int GetType();
     void CodeToID(unsigned int Code);
+    int getX();
+    int getY();
 private:
     int x;
     int y;
     Rectangle sourceRec;
-    unsigned int code;
     bool wet;
     Vector2 originVec;
     TileID textureID;
