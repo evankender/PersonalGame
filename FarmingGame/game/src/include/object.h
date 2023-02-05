@@ -3,24 +3,74 @@
 
 #include "raylib.h"
 
+#define DEFAULT_OBJECT -1
+#define GRASSTILE 0
+#define HOEDIRT 1
+
+class TileMap;
+
+class Item;
 
 class Object
 {
 public:
 	Object();
-	Object(int _x, int _y, int _width, int _height, bool _block);
-	Object(int _x, int _y, int _width, int _height, bool _block, int _newMap);
+	Object(int x, int y);
+	Object(int x, int y, int width, int height, bool block, int newMap, int layer);
 	bool isBlocked();
 	bool checkCollision(Rectangle playerRec);
 	int checkExit(Rectangle playerRec);
 	bool isExit();
-	Rectangle objRec;
+	virtual bool interact(TileMap* currentMap, Item* currentItem);
+	virtual int getType();
+	int getX();
+	int getY();
+	int getLayer();
+	int getTileX();
+	int getTileY();
+	virtual void update(TileMap* currentMap, int currentUpdateTicks);
 private:
 	int x;
 	int y;
 	int width;
 	int height;
 	bool block;
-	signed int newMap;
+	int newMap;
+	int layer;
+	Rectangle objRec;
 };
+
+class GrassTile : public Object
+{
+public:
+	GrassTile();
+	GrassTile(int x, int y);
+	virtual bool interact(TileMap* currentMap, Item* currentItem);
+	virtual int getType();
+};
+
+class HoeDirt : public Object
+{
+public:
+	HoeDirt();
+	HoeDirt(int x, int y);
+	virtual bool interact(TileMap* currentMap, Item* currentItem);
+	virtual int getType();
+};
+
+class Crop : public Object
+{
+public:
+	Crop();
+	Crop(int _x, int _y);
+	void virtual update(TileMap* currentMap, int currentUpdateTicks);
+	void grow(TileMap* currentMap);
+	bool virtual interact(TileMap* currentMap, Item* currentItem);
+private:
+	int cropTicks;
+	int growthStage;
+	int maxGrowthStage;
+	bool isWet;
+};
+
 #endif

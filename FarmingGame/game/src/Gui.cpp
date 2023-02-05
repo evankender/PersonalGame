@@ -16,7 +16,7 @@ Hotbar::Hotbar(int _numSlots)
     itemSize = 84;
 }
 
-void Hotbar::Draw()
+void Hotbar::draw()
 {
     const int hotbarX = (GetScreenWidth() / 2) - ((numSlots * itemSize) / 2);
     const int hotbarY = GetScreenHeight() - itemSize - 10;

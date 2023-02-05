@@ -1,4 +1,5 @@
 #include "include/tile.h"
+#include "include/player.h"
 #include "raylib.h"
 #include <cstdio>
 #include <unordered_map>
@@ -128,41 +129,37 @@ unordered_map<int, TileID> edgeTable = {  //inserting element directly in map
 
 };
 
-Tile::Tile() : Tile(1, 1, 1) {}
+Tile::Tile() : Tile(1, 1, -1) {}
 
 Tile::Tile(int _x, int _y, int _textureID) 
 {
     x = _x;
     y = _y;
     textureID = TileID(_textureID, 0.0f);
-    sourceRec = { (float)((textureID.GetID() % 15) * TILE_SPRITE_SIZE), (float)((int)(textureID.GetID() / 15) * TILE_SPRITE_SIZE), TILE_SPRITE_SIZE, TILE_SPRITE_SIZE };
+    sourceRec = getSrcRec(textureID.GetID());
     originVec = { TILE_SIZE / 2, TILE_SIZE / 2 };
 }
 
-Tile::Tile(const Tile& other, int _textureID)
+Tile::Tile(const Tile& other, int _textureID) : Tile(other.x, other.y, _textureID)
 {
-    x = other.x;
-    y = other.y;
-    textureID = TileID(_textureID, 0.0f);
-    sourceRec = { (float)((textureID.GetID() % 15) * TILE_SPRITE_SIZE), (float)((int)(textureID.GetID() / 15) * TILE_SPRITE_SIZE), TILE_SPRITE_SIZE, TILE_SPRITE_SIZE };
-    originVec = { TILE_SIZE / 2, TILE_SIZE / 2 };
 }
 
-Tile::Tile(int _x, int _y, int _textureID, Rectangle _sourceRec)
+Tile::Tile(int _x, int _y, int _textureID, Rectangle _sourceRec) : Tile(_x, _y, _textureID)
 {
-    x = _x;
-    y = _y;
     sourceRec = _sourceRec;
-    textureID = TileID(_textureID, 0.0f);
-    originVec = { TILE_SIZE / 2, TILE_SIZE / 2 };
 }
 
-void Tile::Draw(Texture2D tileSet, int playerX, int playerY, int screenWidth, int screenHeight)
+void Tile::draw(Texture2D tileSet, Player* player)
 { 
-    DrawTexturePro(tileSet, sourceRec, { (float)((x * TILE_SIZE) - (playerX - screenWidth / 2)),(float)((y * TILE_SIZE) - (playerY - screenHeight / 2)), TILE_SIZE, TILE_SIZE }, originVec, textureID.GetRotation(), WHITE);
+    if (getTextureID() != -1)
+    {
+        Rectangle destRec = player->getDestRec(x, y);
+        DrawTexturePro(tileSet, sourceRec, destRec, originVec, textureID.GetRotation(), WHITE);
+    }
+   
 }
 
-void Tile::Draw(Texture2D tileSet, int playerX, int playerY, int screenWidth, int screenHeight, std::vector<int> mudCode)
+void Tile::draw(Texture2D tileSet, int playerX, int playerY, int screenWidth, int screenHeight, std::vector<int> mudCode)
 {
     if (wet)
     {
@@ -179,53 +176,51 @@ void Tile::Draw(Texture2D tileSet, int playerX, int playerY, int screenWidth, in
 
         }
     }
-    else Draw(tileSet, playerX, playerY, screenWidth, screenHeight);
+    //else Draw(tileSet, player);
 }
 
 
-void Tile::SetTextureID(int newtextureID)
+void Tile::setTextureID(int newtextureID)
 {
     textureID = TileID(newtextureID, 0);
-    SetTextureID(textureID);
-
+    setTextureID(textureID);
 }
 
-void Tile::SetTextureID(int newtextureID, float rotation)
+void Tile::setTextureID(int newtextureID, float rotation)
 {
     textureID = TileID(newtextureID, rotation);
-    SetTextureID(textureID);
-
+    setTextureID(textureID);
 }
 
-void Tile::SetTextureID(TileID tileID)
+void Tile::setTextureID(TileID tileID)
 {
     textureID = tileID;
-    sourceRec = { (float)((textureID.GetID() % 21) * TILE_SPRITE_SIZE), (float)((int)(textureID.GetID() / 21) * TILE_SPRITE_SIZE), TILE_SPRITE_SIZE, TILE_SPRITE_SIZE };
+    sourceRec = getSrcRec(textureID.GetID());
 }
 
-int Tile::GetTextureID()
+int Tile::getTextureID()
 {
     return textureID.GetID();
 }
 
-float Tile::GetIDRotation()
+float Tile::getIDRotation()
 {
     return textureID.GetRotation();
 }
 
-Tile* Tile::Interact(int item)
+Tile* Tile::interact(int item)
 {
     return this;
 }
 
-int Tile::GetType()
+int Tile::getType()
 {
     return 0;
 }
 
-void Tile::CodeToID(unsigned int _code)
+void Tile::codeToID(unsigned int _code)
 {
-    SetTextureID(blobTable[_code]);
+    setTextureID(blobTable[_code]);
 }
 
 int Tile::getX()
@@ -236,4 +231,10 @@ int Tile::getX()
 int Tile::getY()
 {
     return y;
+}
+
+Rectangle Tile::getSrcRec(int tileId)
+{
+    Rectangle returnRec = {(float)((tileId % TILES_WIDE) * TILE_SPRITE_SIZE), (float)((int)(tileId / TILES_WIDE) * TILE_SPRITE_SIZE), TILE_SPRITE_SIZE, TILE_SPRITE_SIZE};
+    return returnRec;
 }

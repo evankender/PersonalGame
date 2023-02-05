@@ -12,7 +12,7 @@ private:
 class Hotbar : public GUI {
 public:
 	Hotbar(int numSlots);
-	void Draw();
+	void draw();
 	void UpdateSelSlot(int newSlot);
 	int GetSelSlot();
 private:

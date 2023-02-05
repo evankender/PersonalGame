@@ -2,10 +2,14 @@
 #include "include/tile.h"
 #include "include/tiles.h"
 #include "include/player.h"
+#include "include/item.h"
+#include "include/tilemap.h"
+#include <cstdio>
+#include <iostream>
 
 Tiles::Tiles()
 {
-    
+ 
     alwaysFrontTile = new Tile();
     frontTile = new Tile();
     pathTile = new Tile();
@@ -17,7 +21,6 @@ Tiles::Tiles()
 	pathObj = new Object();
 	buildingObj = new Object();
 	backObj = new Object();
-
 }
 
 Tiles::~Tiles()
@@ -26,6 +29,7 @@ Tiles::~Tiles()
     delete(frontTile);
     delete(pathTile);
     delete(buildingTile);
+    delete(backTile);
 
     delete(alwaysFrontObj);
     delete(frontObj);
@@ -36,47 +40,50 @@ Tiles::~Tiles()
 
 void Tiles::setTile(Tile* tile, int tileLayer)
 {
-
     switch (tileLayer)
     {
-    case 0: 
+    case ALWAYSFRONT_LAYER: 
+        delete(alwaysFrontTile);
         alwaysFrontTile = tile;
         break;
-    case 1:
+    case FRONT_LAYER:
+        delete(frontTile);
         frontTile = tile;
         break; 
-    case 2:
+    case PATH_LAYER:
+        delete(pathTile);
         pathTile = tile;
         break;
-    case 3:
+    case BUILDING_LAYER:
+        delete(buildingTile);
         buildingTile = tile;
         break;
-    case 4:
+    case BACK_LAYER:
+        delete(backTile);
         backTile = tile;
         break;
     default:
         break;
     }
- 
 }
 
 Tile* Tiles::getTile(int tileLayer)
 {
     switch (tileLayer)
     {
-    case 0:
+    case ALWAYSFRONT_LAYER:
         return alwaysFrontTile;
 
-    case 1:
+    case FRONT_LAYER:
         return frontTile;
 
-    case 2:
+    case PATH_LAYER:
         return pathTile;
 
-    case 3:
+    case BUILDING_LAYER:
         return buildingTile;
 
-    case 4:
+    case BACK_LAYER:
         return backTile;
     default:
         break;
@@ -86,22 +93,27 @@ Tile* Tiles::getTile(int tileLayer)
 
 void Tiles::setObj(Object* obj, int ObjLayer)
 {
-
+    //std::cout << obj->getX() << "\n";
     switch (ObjLayer)
     {
-    case 0:
+    case ALWAYSFRONT_LAYER:
+        delete(alwaysFrontObj);
         alwaysFrontObj = obj;
         break;
-    case 1:
+    case FRONT_LAYER:
+        delete(frontObj);
         frontObj = obj;
         break;
-    case 2:
+    case PATH_LAYER:
+        delete(pathObj);
         pathObj = obj;
         break;
-    case 3:
+    case BUILDING_LAYER:
+        delete(buildingObj);
         buildingObj = obj;
         break;
-    case 4:
+    case BACK_LAYER:
+        delete(backObj);
         backObj = obj;
         break;
     default:
@@ -113,15 +125,15 @@ Object* Tiles::getObj(int objLayer)
 {
     switch (objLayer)
     {
-    case 0:
+    case ALWAYSFRONT_LAYER:
         return alwaysFrontObj;
-    case 1:
+    case FRONT_LAYER:
         return frontObj;
-    case 2:
+    case PATH_LAYER:
         return pathObj;
-    case 3:
+    case BUILDING_LAYER:
         return buildingObj;
-    case 4:
+    case BACK_LAYER:
         return backObj;
     default:
         break;
@@ -178,4 +190,62 @@ int Tiles::checkExit(Rectangle playerRec)
         returnLevel = backObj->checkExit(playerRec);
     }
     return returnLevel;
+}
+
+void Tiles::setTileTextureId(int tileLayer, int textureId)
+{
+    
+    switch (tileLayer)
+    {
+    case ALWAYSFRONT_LAYER:
+        alwaysFrontTile->setTextureID(textureId);
+        break;
+    case FRONT_LAYER:
+        frontTile->setTextureID(textureId);
+        break;
+    case PATH_LAYER:
+        pathTile->setTextureID(textureId);
+        break;
+    case BUILDING_LAYER:
+        buildingTile->setTextureID(textureId);
+        break;
+    case BACK_LAYER:
+        backTile->setTextureID(textureId);
+        break;
+    default:
+        break;
+    }
+}
+
+void Tiles::interact(TileMap* currentMap, Item* currentItem)
+{
+    if(alwaysFrontObj->interact(currentMap, currentItem)) return;
+    if(frontObj->interact(currentMap, currentItem)) return;
+    if (buildingObj->interact(currentMap, currentItem)) return;
+    if(pathObj->interact(currentMap, currentItem)) return;
+    if(backObj->interact(currentMap, currentItem)) return;
+    return;
+}
+
+int Tiles::getTileId(int tileLayer)
+{
+    switch (tileLayer)
+    {
+    case ALWAYSFRONT_LAYER:
+        return alwaysFrontTile->getTextureID();
+
+    case FRONT_LAYER:
+        return frontTile->getTextureID();
+
+    case PATH_LAYER:
+        return pathTile->getTextureID();
+
+    case BUILDING_LAYER:
+        return buildingTile->getTextureID();
+
+    case BACK_LAYER:
+        return backTile->getTextureID();
+    default:
+        break;
+    }
 }

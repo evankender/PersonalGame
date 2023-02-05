@@ -1,9 +1,6 @@
 #ifndef TILES_H
 #define TILES_H
 
-#include "include/object.h"
-#include "include/tile.h"
-
 class Player;
 
 class Tiles
@@ -16,7 +13,10 @@ public:
     void setObj(Object* obj, int objLayer);
     Object* getObj(int tobjLayer);
     bool checkCollision(Rectangle playerRec);
-    signed int checkExit(Rectangle playerRec);
+    int checkExit(Rectangle playerRec);
+    void setTileTextureId(int layer, int textureId);
+    void interact(TileMap* map, Item* item);
+    int getTileId(int layer);
 private:
     Tile* alwaysFrontTile;
     Tile* frontTile;

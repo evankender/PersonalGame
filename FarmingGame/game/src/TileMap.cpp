@@ -1,4 +1,5 @@
 #include "include/tilemap.h"
+#include "include/object.h"
 #include "include/tile.h"
 #include "include/tiles.h"
 #include "include/player.h"
@@ -8,16 +9,17 @@
 #include <unordered_map>
 #include <map>
 #include "include/tileson.hpp"
+#include <tuple>
 
 using namespace std;
 
 unordered_map<std::string, int> LayersMap =
 {
-    {"AlwaysFront", 0},
-    {"Front", 1},
-    {"Paths", 2},
-    {"Buildings", 3},
-    {"Back", 4},
+    {"AlwaysFront", ALWAYSFRONT_LAYER},
+    {"Front", FRONT_LAYER},
+    {"Paths", PATH_LAYER},
+    {"Buildings", BUILDING_LAYER},
+    {"Back", BACK_LAYER},
 };
 
 TileMap::TileMap()
@@ -61,19 +63,22 @@ TileMap::TileMap(std::string mapLocation)
                     std::any blocked = false;
                     std::any exit = -1;
 
-
                     if (obj.getProperties().hasProperty("block"))
                     {
-                        blocked = obj.getProperties().getProperty("block");
+                        blocked = obj.getProperties().getProperty("block")->getValue();
                     }
 
                     if (obj.getProperties().hasProperty("exit"))
                     {
                         exit = obj.getProperties().getProperty("exit")->getValue();
-
                     }
-              
-                    Object* newObj = new Object(position.x, position.y, size.x, size.y, std::any_cast<bool>(blocked), std::any_cast<int>(exit));
+
+                    Object* newObj = new Object(position.x, position.y, size.x, size.y, std::any_cast<bool>(blocked), std::any_cast<int>(exit), LayersMap[layer.getName()]);
+
+                    if (obj.getProperties().hasProperty("isGrass"))
+                    {
+                        newObj = new GrassTile(position.x, position.y);
+                    }
 
                     int tileY = position.y / (TILE_SPRITE_SIZE);
                     int tileX = position.x / (TILE_SPRITE_SIZE);
@@ -91,14 +96,16 @@ TileMap::TileMap(std::string mapLocation)
                     tson::Tile* tile = tileObject.getTile();
                     if (tile != nullptr)
                     {
-                        int tileID = tile->getId();
+                        int tileId = tile->getId();
+
+ 
 
                         
                         tson::Rect srcRectJson = tile->getDrawingRect();
                         tson::Vector2i position = tileObject.getPositionInTileUnits();
 
                         Rectangle srcRect = { srcRectJson.x, srcRectJson.y, srcRectJson.width, srcRectJson.height };
-                        Tile* tile = new Tile(position.x, position.y, tileID, srcRect);
+                        Tile* tile = new Tile(position.x, position.y, tileId, srcRect);
 
                         tileMap[position.y][position.x]->setTile(tile, LayersMap[layer.getName()]);
 
@@ -125,149 +132,88 @@ TileMap::~TileMap()
     }
 }
 
-
-void TileMap::draw(Player player, Texture2D tileSet, Texture2D playerSprite) 
+void TileMap::drawBack(Player* player, Texture2D tileSet) 
 {
 
     std::vector<int> mudCode;
 
-    const int mouseX = GetMouseX() + (TILE_SIZE/2);
-    const int mouseY = GetMouseY() + (TILE_SIZE / 2);
+    auto drawDistance = getDrawDistance(player->getX(), player->getY(), player->getCol(), player->getRow());
+    int rowStart, colStart, rowEnd, colEnd;
+    std::tie(rowStart, rowEnd, colStart, colEnd) = drawDistance;
 
-    const int playerX = player.GetX();
-    const int playerY = player.GetY();
 
-    const int screenWidth = GetScreenWidth();
-    const int screenHeight = GetScreenHeight();
-
-    const int mouseCol = ((((mouseX + (playerX - screenWidth / 2))) / TILE_SIZE));
-    const int mouseRow = ((mouseY + (playerY - screenHeight / 2)) / TILE_SIZE);
-
-    const int playerCol = player.GetCol();
-    const int playerRow = player.GetRow();
-
-    const int tileWidth = screenWidth / TILE_SIZE;
-    const int tileHeight = screenHeight / TILE_SIZE;
-
-    int colStart = (playerCol - (tileWidth / 2)) - 1;
-    int rowStart = (playerRow - (tileHeight / 2)) - 2;
-
-    int colEnd = (playerCol + (tileWidth / 2)) + 2;
-    int rowEnd = (playerRow + (tileHeight / 2)) + 2;
-
-    int row = 0;
-    int col = 0;
-
-    if ((colStart) < 0)
+    for (int row = rowStart; row < rowEnd; row++)
     {
-        colStart = 0;
-    }
-
-    if ((colEnd) > MAP_WIDTH)
-    {
-        colEnd = MAP_WIDTH;
-    }
-
-    if ((rowStart) < 0)
-    {
-        rowStart = 0;
-    }
-
-    if ((rowEnd) > MAP_HEIGHT)
-    {
-        rowEnd = MAP_HEIGHT;
-    }
-    
-    for (row = rowStart; row < rowEnd; row++)
-    {
-        for (col = colStart; col < colEnd; col++)
+        for (int col = colStart; col < colEnd; col++)
         {
 
             //if (tileMap[row][col]->pathObj->IsWet()) GetTileCodeMud(row, col, mudCode);
 
-            Tile* backTile = tileMap[row][col]->getTile(4);
-            backTile->Draw(tileSet, playerX, playerY, screenWidth, screenHeight);
+            Tile* backTile = tileMap[row][col]->getTile(BACK_LAYER);
+            backTile->draw(tileSet, player);
 
-            Tile* buidlingTile = tileMap[row][col]->getTile(3);
-            buidlingTile->Draw(tileSet, playerX, playerY, screenWidth, screenHeight);
+            Tile* pathTile = tileMap[row][col]->getTile(PATH_LAYER);
+            //pathTile->CodeToID(getPathCode(row, col));
+            pathTile->draw(tileSet, player);
 
-            Tile* pathTile = tileMap[row][col]->getTile(2);
-            pathTile->CodeToID(GetPathCode(row, col));
-            pathTile->Draw(tileSet, playerX, playerY, screenWidth, screenHeight);
+            Tile* buidlingTile = tileMap[row][col]->getTile(BUILDING_LAYER);
+            buidlingTile->draw(tileSet, player);
 
-            Tile* frontTile = tileMap[row][col]->getTile(1);
-            frontTile->Draw(tileSet, playerX, playerY, screenWidth, screenHeight);
+            Tile* frontTile = tileMap[row][col]->getTile(FRONT_LAYER);
+            frontTile->draw(tileSet, player);
 
-            Tile* alwaysFrontTile = tileMap[row][col]->getTile(0);
-            alwaysFrontTile->Draw(tileSet, playerX, playerY, screenWidth, screenHeight);
+            Tile* alwaysFrontTile = tileMap[row][col]->getTile(ALWAYSFRONT_LAYER);
+            alwaysFrontTile->draw(tileSet, player);
 
-     
-            if (((screenHeight/2)/TILE_SIZE == (row - rowStart)-3) && ((screenWidth / 2)/TILE_SIZE == (col - colStart)-2))
-             {
-                    player.DrawPlayer(screenWidth, screenHeight, playerSprite);
-
-                    frontTile = tileMap[row-1][col]->getTile(1);
-                    frontTile->Draw(tileSet, playerX, playerY, screenWidth, screenHeight);
-
-                    frontTile = tileMap[row-1][col+1]->getTile(1);
-                    frontTile->Draw(tileSet, playerX, playerY, screenWidth, screenHeight);
-
-                    frontTile = tileMap[row-1][col - 1]->getTile(1);
-                    frontTile->Draw(tileSet, playerX, playerY, screenWidth, screenHeight);
-
-                    alwaysFrontTile = tileMap[row-1][col - 1]->getTile(0);
-                    alwaysFrontTile->Draw(tileSet, playerX, playerY, screenWidth, screenHeight);
-
-                    alwaysFrontTile = tileMap[row-1][col + 1]->getTile(0);
-                    alwaysFrontTile->Draw(tileSet, playerX, playerY, screenWidth, screenHeight);
-
-                    alwaysFrontTile = tileMap[row - 2][col]->getTile(0);
-                    alwaysFrontTile->Draw(tileSet, playerX, playerY, screenWidth, screenHeight);
-
-                    alwaysFrontTile = tileMap[row - 1][col]->getTile(0);
-                    alwaysFrontTile->Draw(tileSet, playerX, playerY, screenWidth, screenHeight);
-
-                    alwaysFrontTile = tileMap[row - 2][col - 1]->getTile(0);
-                    alwaysFrontTile->Draw(tileSet, playerX, playerY, screenWidth, screenHeight);
-
-                    alwaysFrontTile = tileMap[row - 2][col + 1]->getTile(0);
-                    alwaysFrontTile->Draw(tileSet, playerX, playerY, screenWidth, screenHeight);
-
-                    alwaysFrontTile = tileMap[row - 1][col + 1]->getTile(0);
-                    alwaysFrontTile->Draw(tileSet, playerX, playerY, screenWidth, screenHeight);
-
-                    alwaysFrontTile = tileMap[row - 1][col -1]->getTile(0);
-                    alwaysFrontTile->Draw(tileSet, playerX, playerY, screenWidth, screenHeight);
-
-                    alwaysFrontTile = tileMap[row - 3][col + 1]->getTile(0);
-                    alwaysFrontTile->Draw(tileSet, playerX, playerY, screenWidth, screenHeight);
-
-                    alwaysFrontTile = tileMap[row - 3][col - 1]->getTile(0);
-                    alwaysFrontTile->Draw(tileSet, playerX, playerY, screenWidth, screenHeight);
-
-                    alwaysFrontTile = tileMap[row - 3][col]->getTile(0);
-                    alwaysFrontTile->Draw(tileSet, playerX, playerY, screenWidth, screenHeight);
-            }
-            alwaysFrontTile = tileMap[row][col]->getTile(0);
-            alwaysFrontTile->Draw(tileSet, playerX, playerY, screenWidth, screenHeight);
-
-            if ((mouseCol == col && mouseRow == row) && (playerAdjacent(mouseRow, mouseCol, player)))
-            {
-                DrawRectangleRoundedLines({ (float)(((col * TILE_SIZE) - (playerX - screenWidth / 2)) - 30) , (float)(((row * TILE_SIZE) - (playerY - screenHeight / 2)) - 30), TILE_SIZE - 5.6f, TILE_SIZE - 5.6f }, .2f, 5, 4.0f, GOLD);
-            }
         }
     }
 }
 
-float TileMap::GetTileSpeed(int row, int col)
+void TileMap::drawFront(Player* player, Texture2D tileSet)
+{
+    auto drawDistance = getDrawDistance(player->getX(), player->getY(), player->getCol(), player->getRow());
+    int rowStart, colStart, rowEnd, colEnd;
+    std::tie(rowStart, rowEnd, colStart, colEnd) = drawDistance;
+
+    int frontEnd = ((GetScreenHeight() / 2) / TILE_SIZE) + 1;
+
+    for (int row = rowStart; row < rowEnd; row++)
+    {
+        for (int col = colStart; col < colEnd; col++)
+        {
+            if ((row-rowStart) > frontEnd)
+            {
+                Tile* frontTile = tileMap[row][col]->getTile(FRONT_LAYER);
+                frontTile->draw(tileSet, player);
+            }
+            Tile* alwaysFrontTile = tileMap[row][col]->getTile(ALWAYSFRONT_LAYER);
+            alwaysFrontTile->draw(tileSet, player);
+        }
+    }
+}
+
+void TileMap::update(int currentUpdateTicks)
+{
+    for (int row = 0; row < MAP_HEIGHT; row++)
+    {
+        for (int col = 0; col < MAP_WIDTH; col++)
+        {
+            Object* buidlingObj = tileMap[row][col]->getObj(BUILDING_LAYER);
+            buidlingObj->update(this, currentUpdateTicks);
+        }
+    }
+}
+
+
+float TileMap::getTileSpeed(int row, int col)
 {
     return 1;//tileMap[row][col]->TileSpeed();
 }
 
-bool TileMap::playerAdjacent(int row, int col, Player player)
+bool TileMap::playerAdjacent(int row, int col, Player* player)
 {
-    int playerCol = player.GetCol();
-    int playerRow = player.GetRow();
+    int playerCol = player->getCol();
+    int playerRow = player->getRow();
     return ((col >= playerCol - 1 && col <= playerCol + 1) && (row >= playerRow - 1 && row <= playerRow + 1));
 }
 
@@ -304,14 +250,14 @@ bool TileMap::checkAdjacent(int playerRow, int playerCol, Rectangle playerRec, i
     return result;
 }
 
-signed int TileMap::checkLevelExit(Player player) //0 is for block 1 is for exit
+signed int TileMap::checkLevelExit(Player* player) //0 is for block 1 is for exit
 {
     int n = tileMap.size();
     int m = tileMap.size();
 
-    const int playerRow = player.GetRow();
-    const int playerCol = player.GetCol();
-    const Rectangle playerRec = player.getRec();
+    const int playerRow = player->getRow();
+    const int playerCol = player->getCol();
+    const Rectangle playerRec = player->getRec();
 
     int newMap = tileMap[playerRow][playerCol]->checkExit(playerRec);
 
@@ -331,7 +277,6 @@ signed int TileMap::checkLevelExit(Player player) //0 is for block 1 is for exit
                 newMap = tileMap[playerRow + dRow][playerCol + dCol]->checkExit(playerRec);
                 if (newMap > -1)
                 {
-                  
                     return newMap;
                 }
             }
@@ -340,7 +285,7 @@ signed int TileMap::checkLevelExit(Player player) //0 is for block 1 is for exit
     return newMap;
 }
 
-unsigned int TileMap::GetPathCode(int y, int x) {
+unsigned int TileMap::getPathCode(int y, int x) {
 
     unsigned int code = 0;
     int top = 0;
@@ -376,7 +321,7 @@ unsigned int TileMap::GetPathCode(int y, int x) {
     return code;
 }
 
-void TileMap::GetPathCodeMud(int y, int x, std::vector<int>& code) 
+void TileMap::getPathCodeMud(int y, int x, std::vector<int>& code) 
 {
     code.clear();
     code.resize(8);
@@ -436,7 +381,7 @@ void TileMap::GetPathCodeMud(int y, int x, std::vector<int>& code)
     }
 }
 
-void TileMap::SetPathTile(int row, int col, int val)
+void TileMap::setPathTile(int row, int col, int val)
 {
     edgeMap[(row * 2) + 1][(col * 2) + 1] = val;
     UpdateEdge();
@@ -527,3 +472,94 @@ void TileMap::setTile(Tile* tile, int layer)
     tileMap[tile->getY()][tile->getX()]->setTile(tile, layer);
 }
 
+void TileMap::setObj(Object* object, int layer)
+{
+    tileMap[object->getTileY()][object->getTileX()]->setObj(object, layer);
+}
+
+void TileMap::setTileTextureId(int x, int y, int layer, int textureId)
+{
+    tileMap[y][x]->setTile(new Tile(x, y, textureId), layer);
+    //tileMap[y][x]->setTileTextureId(layer, textureId);
+}
+
+void TileMap::interact(int x, int y, Item* item)
+{
+    tileMap[y][x]->interact(this, item);
+}
+
+void TileMap::delTile(int x, int y, int layer)
+{
+    delete(tileMap[y][x]->getTile(layer));
+}
+
+void TileMap::delObj(int x, int y, int layer)
+{
+    delete(tileMap[y][x]->getObj(layer));
+}
+
+void TileMap::blankTile(int x, int y, int layer)
+{
+     tileMap[y][x]->setTile(new Tile(x, y, -1), layer);
+}
+
+void TileMap::blankObj(int x, int y, int layer)
+{
+    int tileX = 0;
+    int tileY = 0;
+    if (y != 0)
+    {
+        tileY = y / 32;
+    }
+
+    if (x != 0)
+    {
+        tileX = x / 32;
+    }
+
+    tileMap[tileY][tileX]->setObj(new Object(x, y), layer);
+}
+
+
+std::tuple<int, int, int, int> TileMap::getDrawDistance(int playerX, int playerY, int playerCol, int playerRow)
+{
+
+    const int tilesWide = GetScreenWidth() / TILE_SIZE;
+    const int tilesHigh = GetScreenHeight() / TILE_SIZE;
+
+    int colStart = (playerCol - (tilesWide / 2)) - 1;
+    int rowStart = (playerRow - (tilesHigh / 2)) - 2;
+
+    int colEnd = (playerCol + (tilesWide / 2)) + 2;
+    int rowEnd = (playerRow + (tilesHigh / 2)) + 2;
+
+    int row = 0;
+    int col = 0;
+
+    if ((colStart) < 0)
+    {
+        colStart = 0;
+    }
+
+    if ((colEnd) > MAP_WIDTH)
+    {
+        colEnd = MAP_WIDTH;
+    }
+
+    if ((rowStart) < 0)
+    {
+        rowStart = 0;
+    }
+
+    if ((rowEnd) > MAP_HEIGHT)
+    {
+        rowEnd = MAP_HEIGHT;
+    }
+
+    return std::make_tuple(rowStart, rowEnd, colStart, colEnd);
+}
+
+int TileMap::getTileTextureId(int x, int y, int layer)
+{
+    return tileMap[y][x]->getTileId(layer);
+}

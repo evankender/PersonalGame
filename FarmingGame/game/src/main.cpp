@@ -89,14 +89,14 @@ int main()
     game.loadTextures();
 
     //Shader shdrSpot = SetUpShader();
-
+    SetExitKey(KEY_RIGHT_BRACKET);
     while (!WindowShouldClose()) 
     {
         BeginDrawing();
         ClearBackground(WHITE);
-
-        game.update();
         game.draw();
+        game.update();
+        
         DrawFPS(0, 0);
 
         //BeginShaderMode(shdrSpot);

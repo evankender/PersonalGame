@@ -1,6 +1,8 @@
 #include "include/tilemap.h"
 #include "include/tile.h"
 #include "include/player.h"
+#include "include/item.h"
+
 
 Player::Player() {
     playerFrameCount = 0;
@@ -11,27 +13,25 @@ Player::Player() {
     mapPtr = nullptr;
     playerSpeed = 4.0f;
     playerRec = { float(playerX + 20), float(playerY + 40), 20, 20 };
+    selSlot = 0;
+    hotBar.resize(5);
+    hotBar[0] = new Hoe();
+    hotBar[1] = new Pickaxe();
+    hotBar[2] = new Seed();
 }
 
-Player::Player(TileMap &tileMap) {
-    playerFrameCount = 0;
-    playerX = (TILE_SIZE * (MAP_WIDTH / 2));
-    playerY = (TILE_SIZE * (MAP_HEIGHT / 2));
-    sourceRec = { 0, 0, 64, 64 };
-    originVec = { 35 , 48 };
+Player::Player(TileMap &tileMap) :Player() {
     mapPtr = &tileMap;
-    playerSpeed = 4.0f;
-    playerRec = { float(playerX + 20), float(playerY + 40), 20, 20 };
 }
 
-void Player::Move(int dx, int dy) {
+void Player::move(int dx, int dy) {
 
     const int newX = playerX + (int)(dx * playerSpeed);
     const int newY = playerY + (int)(dy * playerSpeed);
 
     Rectangle newRec = getRec(newX, newY);
   
-    if (!mapPtr->checkAdjacent(GetRow(newY), GetCol(newX), newRec, 0))
+    if (!mapPtr->checkAdjacent(getRow(newY), getCol(newX), newRec, 0))
     {
         playerX = newX;
         playerY = newY;
@@ -44,45 +44,45 @@ void Player::Move(int dx, int dy) {
     }
 }
 
-void Player::DrawPlayer(int screenWidth, int screenHeight, Texture2D playerSprite)
+void Player::drawPlayer(Texture2D playerSprite)
 {
 
-    DrawTexturePro(playerSprite, sourceRec, { (float)screenWidth / 2.0f, (float)screenHeight / 2.0f, 128.0f, 128.0f }, originVec, 0.0f, WHITE);
+    DrawTexturePro(playerSprite, sourceRec, { (float)GetScreenWidth()/ 2.0f, (float)GetScreenHeight() / 2.0f, 128.0f, 128.0f }, originVec, 0.0f, WHITE);
     //DrawRectanglePro({ (float)(screenWidth / 2), (float)(screenHeight / 2), 45, 32 }, { -7, -46 }, 0.0f, GREEN);
     //DrawText(TextFormat("x %f t %f\n", playerRec.x, playerRec.y), 10, 10, 20, MAROON);
 }
 
-void Player::UpdateSpeed()
+void Player::updateSpeed()
 {
-    playerSpeed = mapPtr->GetTileSpeed(GetRow(), GetCol());
+    playerSpeed = mapPtr->getTileSpeed(getRow(), getCol());
 }
 
-int Player::GetX()
+int Player::getX()
 {
     return playerX;
 }
 
-int Player::GetY()
+int Player::getY()
 {
     return playerY;
 }
 
-int Player::GetCol()
+int Player::getCol()
 {
     return ((playerX + (TILE_SIZE/2)) / TILE_SIZE);
 }
 
-int Player::GetRow()
+int Player::getRow()
 {
     return ((playerY + (TILE_SIZE / 2)) / TILE_SIZE) + 1;
 }
 
-int Player::GetCol(int newX)
+int Player::getCol(int newX)
 {
     return ((newX + (TILE_SIZE / 2)) / TILE_SIZE);
 }
 
-int Player::GetRow(int newY)
+int Player::getRow(int newY)
 {
     return ((newY + (TILE_SIZE / 2)) / TILE_SIZE);
 }
@@ -121,4 +121,20 @@ void Player::setPlayerFrame(int playerFrame)
 {
     playerFrameCount = playerFrame;
     sourceRec.x = (float)(TILE_SIZE * playerFrameCount);
+}
+
+Item* Player::getCurrentItem()
+{
+    return hotBar[selSlot];
+}
+
+void Player::setSelSlot(int _selSlot)
+{
+    selSlot = _selSlot;
+}
+
+Rectangle Player::getDestRec(int x, int y)
+{
+    Rectangle returnRec = { (float)((x * TILE_SIZE) - (playerX - (GetScreenWidth() / 2))), (float)((y * TILE_SIZE) - (playerY - (GetScreenHeight() / 2))), TILE_SIZE, TILE_SIZE };
+    return returnRec;
 }
