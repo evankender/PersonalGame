@@ -1,8 +1,11 @@
+#include "include/player.h"
 #include "include/tilemap.h"
 #include "include/tile.h"
-#include "include/player.h"
 #include "include/item.h"
-
+#include "include/inventory.h"
+#include <memory>
+#include <cstdio>
+#include <iostream>
 
 Player::Player() {
     playerFrameCount = 0;
@@ -14,13 +17,13 @@ Player::Player() {
     playerSpeed = 4.0f;
     playerRec = { float(playerX + 20), float(playerY + 40), 20, 20 };
     selSlot = 0;
-    hotBar.resize(5);
-    hotBar[0] = new Hoe();
-    hotBar[1] = new Pickaxe();
-    hotBar[2] = new Seed();
+    hotBar = new Inventory(5);
+    hotBar->addItem(new Hoe());
+    hotBar->addItem(new Pickaxe());
+    hotBar->addItem(new Seed(5, 5));
 }
 
-Player::Player(TileMap &tileMap) :Player() {
+Player::Player(TileMap &tileMap) : Player() {
     mapPtr = &tileMap;
 }
 
@@ -44,12 +47,29 @@ void Player::move(int dx, int dy) {
     }
 }
 
-void Player::drawPlayer(Texture2D playerSprite)
+void Player::drawPlayer(Texture2D* playerSprite, Texture2D* imageSet)
 {
 
-    DrawTexturePro(playerSprite, sourceRec, { (float)GetScreenWidth()/ 2.0f, (float)GetScreenHeight() / 2.0f, 128.0f, 128.0f }, originVec, 0.0f, WHITE);
+    DrawTexturePro(*playerSprite, sourceRec, { (float)GetScreenWidth()/ 2.0f, (float)GetScreenHeight() / 2.0f, 128.0f, 128.0f }, originVec, 0.0f, WHITE);
     //DrawRectanglePro({ (float)(screenWidth / 2), (float)(screenHeight / 2), 45, 32 }, { -7, -46 }, 0.0f, GREEN);
-    //DrawText(TextFormat("x %f t %f\n", playerRec.x, playerRec.y), 10, 10, 20, MAROON);
+    DrawText(TextFormat("x %f t %f\n", playerRec.x, playerRec.y), 10, 10, 20, MAROON);
+
+
+
+    int itemSize = 64;
+    const int hotbarX = (GetScreenWidth() / 2) - ((5 * itemSize) / 2);
+    const int hotbarY = GetScreenHeight() - itemSize - 10;
+    for (int i = 0; i < 5; i++)
+    {
+        DrawRectangle(hotbarX + (i * itemSize), hotbarY, itemSize, itemSize, BLUE);
+        if (i == selSlot)
+        {
+            DrawRectangle(hotbarX + (i * itemSize) - 1, hotbarY - 1, itemSize + 2, itemSize + 2, RED);
+        }
+
+    }
+
+    hotBar->draw(hotbarX, hotbarY, imageSet);
 }
 
 void Player::updateSpeed()
@@ -125,7 +145,7 @@ void Player::setPlayerFrame(int playerFrame)
 
 Item* Player::getCurrentItem()
 {
-    return hotBar[selSlot];
+    return hotBar->getItem(selSlot);
 }
 
 void Player::setSelSlot(int _selSlot)
@@ -137,4 +157,9 @@ Rectangle Player::getDestRec(int x, int y)
 {
     Rectangle returnRec = { (float)((x * TILE_SIZE) - (playerX - (GetScreenWidth() / 2))), (float)((y * TILE_SIZE) - (playerY - (GetScreenHeight() / 2))), TILE_SIZE, TILE_SIZE };
     return returnRec;
+}
+
+void Player::pickUp(Item* item)
+{
+    hotBar->addItem(item);
 }

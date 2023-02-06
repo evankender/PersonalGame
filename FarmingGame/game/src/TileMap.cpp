@@ -38,7 +38,7 @@ TileMap::TileMap(std::string mapLocation)
         tileMap[r].resize(MAP_WIDTH);
         for (int c = 0; c < MAP_WIDTH; c++)
         {
-            tileMap[r][c] = new Tiles();
+            tileMap[r][c] = new Tiles(c, r);
         }
     }
 
@@ -98,9 +98,6 @@ TileMap::TileMap(std::string mapLocation)
                     {
                         int tileId = tile->getId();
 
- 
-
-                        
                         tson::Rect srcRectJson = tile->getDrawingRect();
                         tson::Vector2i position = tileObject.getPositionInTileUnits();
 
@@ -132,7 +129,7 @@ TileMap::~TileMap()
     }
 }
 
-void TileMap::drawBack(Player* player, Texture2D tileSet) 
+void TileMap::drawBack(Player* player, Texture2D* tileSet) 
 {
 
     std::vector<int> mudCode;
@@ -169,7 +166,7 @@ void TileMap::drawBack(Player* player, Texture2D tileSet)
     }
 }
 
-void TileMap::drawFront(Player* player, Texture2D tileSet)
+void TileMap::drawFront(Player* player, Texture2D* tileSet)
 {
     auto drawDistance = getDrawDistance(player->getX(), player->getY(), player->getCol(), player->getRow());
     int rowStart, colStart, rowEnd, colEnd;
@@ -188,6 +185,23 @@ void TileMap::drawFront(Player* player, Texture2D tileSet)
             }
             Tile* alwaysFrontTile = tileMap[row][col]->getTile(ALWAYSFRONT_LAYER);
             alwaysFrontTile->draw(tileSet, player);
+        }
+    }
+}
+
+void TileMap::drawItems(Player* player, Texture2D* imageSet)
+{
+    auto drawDistance = getDrawDistance(player->getX(), player->getY(), player->getCol(), player->getRow());
+    int rowStart, colStart, rowEnd, colEnd;
+    std::tie(rowStart, rowEnd, colStart, colEnd) = drawDistance;
+
+    for (int row = rowStart; row < rowEnd; row++)
+    {
+        for (int col = colStart; col < colEnd; col++)
+        {
+
+            tileMap[row][col]->drawItems(imageSet, player);
+ 
         }
     }
 }
@@ -250,7 +264,7 @@ bool TileMap::checkAdjacent(int playerRow, int playerCol, Rectangle playerRec, i
     return result;
 }
 
-signed int TileMap::checkLevelExit(Player* player) //0 is for block 1 is for exit
+int TileMap::checkLevelExit(Player* player) //0 is for block 1 is for exit
 {
     int n = tileMap.size();
     int m = tileMap.size();
@@ -283,6 +297,30 @@ signed int TileMap::checkLevelExit(Player* player) //0 is for block 1 is for exi
         }
     }
     return newMap;
+}
+
+void TileMap::checkPickUps(Player* player) //0 is for block 1 is for exit
+{
+    int n = tileMap.size();
+    int m = tileMap.size();
+
+    const int playerRow = player->getRow();
+    const int playerCol = player->getCol();
+
+    tileMap[playerRow][playerCol]->checkPickUps(player);
+
+    for (int dRow = (playerRow > 0 ? -1 : 0); dRow <= (playerRow < n ? 1 : 0);
+        ++dRow)
+    {
+        for (int dCol = (playerCol > 0 ? -1 : 0);
+            dCol <= (playerCol < m ? 1 : 0); ++dCol)
+        {
+            if (dRow != 0 || dCol != 0)
+            {
+                tileMap[playerRow + dRow][playerCol + dCol]->checkPickUps(player);
+            }
+        }
+    }
 }
 
 unsigned int TileMap::getPathCode(int y, int x) {
@@ -500,11 +538,13 @@ void TileMap::delObj(int x, int y, int layer)
 
 void TileMap::blankTile(int x, int y, int layer)
 {
+     //std:cout << x << " " << y << "\n";
      tileMap[y][x]->setTile(new Tile(x, y, -1), layer);
 }
 
 void TileMap::blankObj(int x, int y, int layer)
 {
+    
     int tileX = 0;
     int tileY = 0;
     if (y != 0)
@@ -562,4 +602,10 @@ std::tuple<int, int, int, int> TileMap::getDrawDistance(int playerX, int playerY
 int TileMap::getTileTextureId(int x, int y, int layer)
 {
     return tileMap[y][x]->getTileId(layer);
+}
+
+void TileMap::addPickUp(int x, int y, Item* item)
+{
+    //std:cout << x << " " << y << "\n";
+    tileMap[y][x]->addPickUp(item);
 }

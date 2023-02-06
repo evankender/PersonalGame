@@ -149,12 +149,12 @@ Tile::Tile(int _x, int _y, int _textureID, Rectangle _sourceRec) : Tile(_x, _y, 
     sourceRec = _sourceRec;
 }
 
-void Tile::draw(Texture2D tileSet, Player* player)
+void Tile::draw(Texture2D* tileSet, Player* player)
 { 
     if (getTextureID() != -1)
     {
         Rectangle destRec = player->getDestRec(x, y);
-        DrawTexturePro(tileSet, sourceRec, destRec, originVec, textureID.GetRotation(), WHITE);
+        DrawTexturePro(*tileSet, sourceRec, destRec, originVec, textureID.GetRotation(), WHITE);
     }
    
 }

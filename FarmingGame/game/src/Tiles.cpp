@@ -9,7 +9,8 @@
 
 Tiles::Tiles()
 {
- 
+    x = 0;
+    y = 0;
     alwaysFrontTile = new Tile();
     frontTile = new Tile();
     pathTile = new Tile();
@@ -21,6 +22,13 @@ Tiles::Tiles()
 	pathObj = new Object();
 	buildingObj = new Object();
 	backObj = new Object();
+
+}
+
+Tiles::Tiles(int _x, int _y) : Tiles()
+{
+    x = _x;
+    y = _y;
 }
 
 Tiles::~Tiles()
@@ -247,5 +255,31 @@ int Tiles::getTileId(int tileLayer)
         return backTile->getTextureID();
     default:
         break;
+    }
+}
+
+void Tiles::addPickUp(Item* item)
+{
+    pickUps.push_back(item);
+}
+
+void Tiles::checkPickUps(Player* player)
+{
+    for (size_t i = 0; i != pickUps.size(); i++) 
+    {
+        if (CheckCollisionRecs(player->getRec(), pickUps[i]->getPickUpRec()))
+        {
+            player->pickUp(pickUps[i]);
+            pickUps[i] = new Item();
+        }
+    }
+
+}
+
+void Tiles::drawItems(Texture* imageSet, Player* player)
+{
+    for (Item* item : pickUps)
+    {
+        item->drawItem(imageSet, player->getDestRec(item->getX(), item->getY()));
     }
 }

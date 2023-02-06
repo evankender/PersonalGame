@@ -39,6 +39,7 @@ private:
 	int currentMapTexture;
 	int currentMapLocation;
 	int currentPlayerTexture;
+	int currentItemsTexture;
 	std::vector<std::string> mapLocations;
 	std::vector<std::string> textureLocations;
 	std::vector<Texture> loadedTextures;

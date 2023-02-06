@@ -17,9 +17,10 @@ GameState::GameState()
 	currentMapLocation = 0;
 	currentMapTexture = 0;
 	currentPlayerTexture = 1;
+	currentItemsTexture = 2;
 	
 	mapLocations = { "loadmap.tmj", "loadmap2.tmj", "loadmap.tmj" };
-	textureLocations = { "tilemap.png", "characterSheet.png" };
+	textureLocations = { "tilemap.png", "characterSheet.png", "items.png"};
 	currentMap = TileMap(mapLocations[currentMapLocation]);
 	player = Player(currentMap);
 	currentState = Running;
@@ -53,6 +54,8 @@ void GameState::updateRunning()
 
 	currentMap.update(updateTicks);
 
+	currentMap.checkPickUps(&player);
+
 	int newMapLocation = currentMap.checkLevelExit(&player);
 
 	if ((newMapLocation > -1) && (newMapLocation != currentMapLocation))
@@ -84,9 +87,15 @@ void GameState::updateLoading()
 
 void GameState::draw()
 {
-	currentMap.drawBack(&player, loadedTextures[currentMapTexture]);
-	player.drawPlayer(loadedTextures[currentPlayerTexture]);
-	currentMap.drawFront(&player, loadedTextures[currentMapTexture]);
+	currentMap.drawBack(&player, &loadedTextures[currentMapTexture]);
+
+	player.drawPlayer(&loadedTextures[currentPlayerTexture], &loadedTextures[currentItemsTexture]);
+
+	currentMap.drawFront(&player, &loadedTextures[currentMapTexture]);
+
+	currentMap.drawItems(&player, &loadedTextures[currentItemsTexture]);
+
+
 	switch (currentState)
 	{
 	case Running:

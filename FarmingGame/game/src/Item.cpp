@@ -2,17 +2,33 @@
 #include "include/tile.h"
 #include "include/tilemap.h"
 #include "include/object.h"
+#include "raylib.h"
 
 Item::Item()
 {
 	amount = -1;
 	itemId = -1;
+	x = 0;
+	y = 0;
+	pickUpRec = { 0,0,0,0 };
+	srcRec = { 0,0,0,0 };
+	destRec = {0,0,0,0};
 }
 
-Item::Item(int _amount, int _itemId)
+Item::Item(int _amount, int _itemId) : Item()
 {
 	amount = _amount;
 	itemId = _itemId;
+	srcRec = getSrcRec();
+
+
+}
+
+Item::Item(int _amount, int _itemId, int _x, int _y) : Item(_amount, _itemId)
+{
+	x = _x;
+	y = _y;
+	
 }
 
 int Item::getType()
@@ -38,6 +54,58 @@ void Item::editAmount(int adjustment)
 int Item::getAmount()
 {
 	return amount;
+}
+
+void Item::setPickUpRec(Rectangle _pickUpRec)
+{
+	pickUpRec = _pickUpRec;
+}
+
+
+Rectangle Item::getPickUpRec()
+{
+	return pickUpRec;
+}
+
+
+void Item::drawItem(Texture* imageSet, Rectangle destRec)
+{
+	if (itemId != -1)
+	{
+		//DrawRectanglePro(destRec, { 0, 0 }, 0.0f, GREEN);
+		DrawTexturePro(*imageSet, srcRec, destRec, {0 , 0}, 0.0f, WHITE);
+	}
+}
+
+Rectangle Item::getSrcRec()
+{
+	Rectangle returnRec = { (float)((itemId % ITEMS_WIDE) * ITEM_SPRITE_SIZE), (float)((int)(itemId / ITEMS_WIDE) * ITEM_SPRITE_SIZE), ITEM_SPRITE_SIZE, ITEM_SPRITE_SIZE };
+	return returnRec;
+}
+
+void Item::setDestRec(Rectangle _destRec)
+{
+	destRec = _destRec;
+}
+
+int Item::getX()
+{
+	return x;
+}
+
+int Item::getY()
+{
+	return y;
+}
+
+void Item::setX(int _x)
+{
+	x = _x;
+}
+
+void Item::setY(int _y)
+{
+	y = _y;
 }
 
 Tool::Tool() : Item(-1, -1) 
@@ -70,7 +138,7 @@ Placeable::Placeable()
 
 }
 
-Placeable::Placeable(int _amount) : Item(_amount, -1)
+Placeable::Placeable(int _amount, int _itemId) : Item(_amount, _itemId)
 {
 
 }
@@ -85,7 +153,7 @@ Seed::Seed()
 
 }
 
-Seed::Seed(int amount) : Placeable(amount) //hoe item Id 0
+Seed::Seed(int amount, int _itemId) : Placeable(amount, _itemId) //hoe item Id 0
 {
 
 }

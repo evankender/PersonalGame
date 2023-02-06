@@ -235,20 +235,39 @@ void Crop::grow(TileMap* currentMap)
 	growthStage++;
 	int tileTextureId = currentMap->getTileTextureId(getTileX(), getTileY(), getLayer()) + TILES_WIDE;
 	currentMap->setTileTextureId(getTileX(), getTileY(), getLayer(), tileTextureId + TILES_WIDE);
-	currentMap->setTileTextureId(getTileX(), (getTileY() - 1), getLayer(), tileTextureId);
-
+	currentMap->setTileTextureId(getTileX(), (getTileY() - 1), getLayer(), tileTextureId);  
 }
+
 bool Crop::interact(TileMap* currentMap, Item* currentItem)
 {
+
+	Item* newItem;
+	Rectangle newPickUpRec;
+
 	switch (currentItem->getType())
 	{
 	case(DEFAULT_ITEM): //default item
+		if (growthStage == maxGrowthStage)
+		{
+			currentMap->blankTile(getTileX(), getTileY(), BUILDING_LAYER);
+			currentMap->blankObj(getX(), getY(), BUILDING_LAYER);
+			
+		}
 		break;
 	case(TOOL): //tool
 		switch (currentItem->getId())
 		{
 		case(1): //pickaxe tool
 			currentMap->blankTile(getTileX(), getTileY(), BUILDING_LAYER);
+
+			newItem = new Pickaxe();
+			newPickUpRec = { (float)getX(), (float)getY(), 32, 32 };
+			newItem->setPickUpRec(newPickUpRec);
+			newItem->setDestRec(newPickUpRec);
+			newItem->setX(getTileX());
+			newItem->setY(getTileY());
+
+			currentMap->addPickUp(getTileX(), getTileY(), newItem);
 			currentMap->blankObj(getX(), getY(), BUILDING_LAYER);
 			break;
 		default:

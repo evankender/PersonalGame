@@ -33,13 +33,15 @@ public:
     TileMap();
     TileMap(std::string mapLocation);
     ~TileMap();
-    void drawBack(Player* player, Texture2D tileset);
-    void drawFront(Player* player, Texture2D tileset);
+    void drawBack(Player* player, Texture2D* tileset);
+    void drawFront(Player* player, Texture2D* tileset);
+    void drawItems(Player* player, Texture2D* imageSet);
     void update(int currentUpdateTicks);
     float getTileSpeed(int tileX, int tileY);
     bool playerAdjacent(int row, int col, Player* player);
     bool checkAdjacent(int playerRow, int playerCol, Rectangle playerRec, int checkType);
     int checkLevelExit(Player* player);
+    void checkPickUps(Player* player);
     unsigned int getPathCode(int x, int y);
     void getPathCodeMud(int x, int y, std::vector<int>& mudCode);
     void setPathTile(int row, int col, int val);
@@ -54,6 +56,7 @@ public:
     void blankObj(int x, int y, int layer);
     std::tuple<int, int, int, int> getDrawDistance(int playerX, int playerY, int playerCol, int playerRow);
     int getTileTextureId(int x, int y, int layer);
+    void addPickUp(int x, int y, Item* item);
 private:
     void UpdateEdge();
     void UpdateCorner();

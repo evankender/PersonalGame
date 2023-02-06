@@ -4,16 +4,19 @@
 #include "raylib.h"
 #include <vector>
 
+
 class Item;
 
 class TileMap;
+
+class Inventory;
 
 class Player {
 public:
     Player();
     Player(TileMap &tileMap);
     void move(int dx, int dy);
-    void drawPlayer(Texture2D playerSprite);
+    void drawPlayer(Texture2D* playerSprite, Texture2D* imageSet);
     void updateSpeed();
     int getX();
     int getY();
@@ -29,7 +32,7 @@ public:
     Item* getCurrentItem();
     void setSelSlot(int selSlot);
     Rectangle getDestRec(int x, int y);
-
+    void pickUp(Item* item);
 private:
     int playerX;
     int playerY;
@@ -40,7 +43,7 @@ private:
     float playerSpeed;
     Rectangle playerRec;
     int selSlot;
-    std::vector<Item*> hotBar;
+    Inventory* hotBar;
 };
 
 #endif

@@ -29,7 +29,7 @@ public:
     Tile(int x, int y, int textureID);
     Tile(const Tile& other, int textureID);
     Tile(int x, int y, int textureID, Rectangle sourceRec);
-    void draw(Texture2D tileSet, Player* player);
+    void draw(Texture2D* tileSet, Player* player);
     void draw(Texture2D tileSet, int playerX, int playerY, int screenWidth, int screenHeight, std::vector<int> mudCode);
     void setTextureID(int textureID);
     void setTextureID(int textureID, float rotation);
