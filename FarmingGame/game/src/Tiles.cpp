@@ -269,8 +269,11 @@ void Tiles::checkPickUps(Player* player)
     {
         if (CheckCollisionRecs(player->getRec(), pickUps[i]->getPickUpRec()))
         {
-            player->pickUp(pickUps[i]);
-            pickUps[i] = new Item();
+            if (player->pickUp(pickUps[i]))
+            {
+                pickUps[i] = new Item();
+            }
+                
         }
     }
 

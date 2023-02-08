@@ -68,6 +68,15 @@ public:
 private:
 };
 
+
+class Watercan: public Tool
+{
+public:
+	Watercan();
+private:
+};
+
+
 class Placeable : public Item
 {
 public:

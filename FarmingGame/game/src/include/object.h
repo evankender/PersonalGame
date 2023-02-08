@@ -29,6 +29,8 @@ public:
 	int getTileX();
 	int getTileY();
 	virtual void update(TileMap* currentMap, int currentUpdateTicks);
+	virtual bool isWet();
+	virtual void setWet(bool wetState) {};
 private:
 	int x;
 	int y;
@@ -56,6 +58,10 @@ public:
 	HoeDirt(int x, int y);
 	virtual bool interact(TileMap* currentMap, Item* currentItem);
 	virtual int getType();
+	virtual bool isWet();
+	void setWet(bool wetState);
+private:
+	bool isDirtWet;
 };
 
 class Crop : public Object
@@ -65,12 +71,14 @@ public:
 	Crop(int _x, int _y);
 	void virtual update(TileMap* currentMap, int currentUpdateTicks);
 	void grow(TileMap* currentMap);
-	bool virtual interact(TileMap* currentMap, Item* currentItem);
+	virtual bool interact(TileMap* currentMap, Item* currentItem);
+	virtual bool isWet();
+	void setWet(bool wetState);
 private:
 	int cropTicks;
 	int growthStage;
 	int maxGrowthStage;
-	bool isWet;
+	bool isCropWet;
 };
 
 #endif

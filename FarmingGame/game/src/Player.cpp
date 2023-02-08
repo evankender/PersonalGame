@@ -17,10 +17,11 @@ Player::Player() {
     playerSpeed = 4.0f;
     playerRec = { float(playerX + 20), float(playerY + 40), 20, 20 };
     selSlot = 0;
-    hotBar = new Inventory(5);
-    hotBar->addItem(new Hoe());
-    hotBar->addItem(new Pickaxe());
-    hotBar->addItem(new Seed(5, 5));
+    inventory = new Inventory(5, 5);
+    inventory->addItem(new Hoe());
+    inventory->addItem(new Pickaxe());
+    inventory->addItem(new Seed(5, 5));
+    inventory->addItem(new Watercan());
 }
 
 Player::Player(TileMap &tileMap) : Player() {
@@ -47,29 +48,26 @@ void Player::move(int dx, int dy) {
     }
 }
 
-void Player::drawPlayer(Texture2D* playerSprite, Texture2D* imageSet)
+void Player::drawPlayer(Texture2D* playerSprite)
 {
-
     DrawTexturePro(*playerSprite, sourceRec, { (float)GetScreenWidth()/ 2.0f, (float)GetScreenHeight() / 2.0f, 128.0f, 128.0f }, originVec, 0.0f, WHITE);
     //DrawRectanglePro({ (float)(screenWidth / 2), (float)(screenHeight / 2), 45, 32 }, { -7, -46 }, 0.0f, GREEN);
     DrawText(TextFormat("x %f t %f\n", playerRec.x, playerRec.y), 10, 10, 20, MAROON);
+}
 
+void Player::drawHotBar(Texture* imageSet)
+{
+    inventory->drawHotBar(0, GetScreenHeight() - 75, selSlot, imageSet);
+}
 
+void Player::drawInventory(Texture* imageSet)
+{
+    inventory->drawPlayerInv(imageSet);
+}
 
-    int itemSize = 64;
-    const int hotbarX = (GetScreenWidth() / 2) - ((5 * itemSize) / 2);
-    const int hotbarY = GetScreenHeight() - itemSize - 10;
-    for (int i = 0; i < 5; i++)
-    {
-        DrawRectangle(hotbarX + (i * itemSize), hotbarY, itemSize, itemSize, BLUE);
-        if (i == selSlot)
-        {
-            DrawRectangle(hotbarX + (i * itemSize) - 1, hotbarY - 1, itemSize + 2, itemSize + 2, RED);
-        }
-
-    }
-
-    hotBar->draw(hotbarX, hotbarY, imageSet);
+void Player::updateInventory()
+{
+    inventory->updateInv();
 }
 
 void Player::updateSpeed()
@@ -145,7 +143,7 @@ void Player::setPlayerFrame(int playerFrame)
 
 Item* Player::getCurrentItem()
 {
-    return hotBar->getItem(selSlot);
+    return inventory->getItem(selSlot);
 }
 
 void Player::setSelSlot(int _selSlot)
@@ -159,7 +157,7 @@ Rectangle Player::getDestRec(int x, int y)
     return returnRec;
 }
 
-void Player::pickUp(Item* item)
+bool Player::pickUp(Item* item)
 {
-    hotBar->addItem(item);
+    return inventory->addItem(item);
 }

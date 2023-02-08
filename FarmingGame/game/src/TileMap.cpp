@@ -150,8 +150,17 @@ void TileMap::drawBack(Player* player, Texture2D* tileSet)
             backTile->draw(tileSet, player);
 
             Tile* pathTile = tileMap[row][col]->getTile(PATH_LAYER);
-            //pathTile->CodeToID(getPathCode(row, col));
+            Object* pathObj = tileMap[row][col]->getObj(PATH_LAYER);
+            pathTile->codeToID(getPathCode(row, col));
             pathTile->draw(tileSet, player);
+            if (pathObj->isWet())
+            {
+                getPathCodeMud(row, col, mudCode);
+                pathTile->draw(tileSet, player, mudCode);
+
+            }
+            
+            
 
             Tile* buidlingTile = tileMap[row][col]->getTile(BUILDING_LAYER);
             buidlingTile->draw(tileSet, player);

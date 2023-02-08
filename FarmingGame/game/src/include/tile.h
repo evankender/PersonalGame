@@ -30,7 +30,7 @@ public:
     Tile(const Tile& other, int textureID);
     Tile(int x, int y, int textureID, Rectangle sourceRec);
     void draw(Texture2D* tileSet, Player* player);
-    void draw(Texture2D tileSet, int playerX, int playerY, int screenWidth, int screenHeight, std::vector<int> mudCode);
+    void draw(Texture2D* tileSet, Player* player, std::vector<int> mudCode);
     void setTextureID(int textureID);
     void setTextureID(int textureID, float rotation);
     void setTextureID(TileID tileID);
@@ -38,7 +38,7 @@ public:
     float getIDRotation();
     Tile* interact(int item);
     int getType();
-    void codeToID(unsigned int Code);
+    void codeToID(int Code);
     int getX();
     int getY();
     Rectangle getSrcRec(int tileId);

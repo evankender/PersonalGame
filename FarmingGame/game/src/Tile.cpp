@@ -96,35 +96,35 @@ unordered_map<int, TileID> blobTable = {  //inserting element directly in map
 unordered_map<int, TileID> edgeTable = {  //inserting element directly in map
  {0 , TileID(0 , 0.0f)},
 
- {130, TileID(32 , 0.0f)},
- {10, TileID(32 , 90.0f)},
- {40, TileID(32 , 180.0f)},
- {160, TileID(32 , 270.0f)},
+ {130, TileID(48 , 0.0f)},
+ {10, TileID(48 , 90.0f)},
+ {40, TileID(48 , 180.0f)},
+ {160, TileID(48 , 270.0f)},
 
- {4, TileID(33 , 0.0f)},
- {16, TileID(33 , 90.0f)},
- {64, TileID(33 , 180.0f)},
- {256, TileID(33 , 270.0f)},
+ {4, TileID(49 , 0.0f)},
+ {16, TileID(49 , 90.0f)},
+ {64, TileID(49 , 180.0f)},
+ {256, TileID(49 , 270.0f)},
 
- {260, TileID(34 , 0.0f)},
- {20, TileID(34 , 90.0f)},
- {80, TileID(34 , 180.0f)},
- {310, TileID(34 , 270.0f)},
+ {260, TileID(50 , 0.0f)},
+ {20, TileID(50 , 90.0f)},
+ {80, TileID(50 , 180.0f)},
+ {310, TileID(50 , 270.0f)},
 
- {8, TileID(35 , 0.0f)},
- {32, TileID(35 , 90.0f)},
- {128, TileID(35 , 180.0f)},
- {512, TileID(35 , 270.0f)},
+ {8, TileID(51 , 0.0f)},
+ {32, TileID(51 , 90.0f)},
+ {128, TileID(51 , 180.0f)},
+ {512, TileID(51 , 270.0f)},
 
- {258, TileID(36 , 0.0f)},
- {12, TileID(36 , 90.0f)},
- {48, TileID(36 , 180.0f)},
- {192, TileID(36 , 270.0f)},
+ {258, TileID(52 , 0.0f)},
+ {12, TileID(52 , 90.0f)},
+ {48, TileID(52 , 180.0f)},
+ {192, TileID(52 , 270.0f)},
 
- {6, TileID(37 , 0.0f)},
- {24, TileID(37 , 90.0f)},
- {96, TileID(37 , 180.0f)},
- {384, TileID(37 , 270.0f)},
+ {6, TileID(53 , 0.0f)},
+ {24, TileID(53 , 90.0f)},
+ {96, TileID(53 , 180.0f)},
+ {384, TileID(53 , 270.0f)},
 
 
 };
@@ -159,24 +159,21 @@ void Tile::draw(Texture2D* tileSet, Player* player)
    
 }
 
-void Tile::draw(Texture2D tileSet, int playerX, int playerY, int screenWidth, int screenHeight, std::vector<int> mudCode)
+void Tile::draw(Texture2D* tileSet, Player* player, std::vector<int> mudCode)
 {
-    if (wet)
+   
+    Rectangle destRec = player->getDestRec(x, y);
+
+    DrawTexturePro(*tileSet,  {sourceRec.x, sourceRec.y + (32), 32, 32}, destRec, originVec, textureID.GetRotation(), WHITE);
+
+    for (int i = 0; i < 8; i++)
     {
-        Rectangle destinationRec = { (float)((x * TILE_SIZE) - (playerX - screenWidth / 2)), (float)((y * TILE_SIZE) - (playerY - screenHeight / 2)), TILE_SIZE, TILE_SIZE };
-
-        DrawTexturePro(tileSet, { (float)(textureID.GetID() % 15) * TILE_SPRITE_SIZE, (float)((int)(textureID.GetID() / 15) * TILE_SPRITE_SIZE) + TILE_SPRITE_SIZE, TILE_SPRITE_SIZE, TILE_SPRITE_SIZE }, destinationRec, originVec, textureID.GetRotation() , WHITE);
-
-        for (int i = 0; i < 8; i++)
+        if ((mudCode[i] != 0) && (edgeTable.count(mudCode[i])))
         {
-            if ((mudCode[i] != 0) && (edgeTable.count(mudCode[i])))
-            {
-                DrawTexturePro(tileSet, { (float)((edgeTable[mudCode[i]].GetID() % 15) * TILE_SPRITE_SIZE), (float)((int)(edgeTable[mudCode[i]].GetID() / 15) * TILE_SPRITE_SIZE), TILE_SPRITE_SIZE, TILE_SPRITE_SIZE }, destinationRec, originVec, edgeTable[mudCode[i]].GetRotation(), WHITE);
-            }
-
+            DrawTexturePro(*tileSet, { (float)((edgeTable[mudCode[i]].GetID() % TILES_WIDE) * TILE_SPRITE_SIZE), (float)((int)(edgeTable[mudCode[i]].GetID() / TILES_WIDE) * TILE_SPRITE_SIZE), TILE_SPRITE_SIZE, TILE_SPRITE_SIZE }, destRec, originVec, edgeTable[mudCode[i]].GetRotation(), WHITE);
         }
+
     }
-    //else Draw(tileSet, player);
 }
 
 
@@ -218,7 +215,7 @@ int Tile::getType()
     return 0;
 }
 
-void Tile::codeToID(unsigned int _code)
+void Tile::codeToID(int _code)
 {
     setTextureID(blobTable[_code]);
 }

@@ -117,6 +117,11 @@ void Object::update(TileMap* currentMap, int currentUpdateTicks)
 
 }
 
+bool Object::isWet()
+{
+	return false;
+}
+
 GrassTile::GrassTile()
 {
 
@@ -139,6 +144,7 @@ bool GrassTile::interact(TileMap* currentMap, Item* currentItem)
 		case(0): //hoe tool
 			currentMap->setTile(new Tile(getTileX(), getTileY(), 0), PATH_LAYER);
 			currentMap->setObj(new HoeDirt(getX(), getY()), PATH_LAYER);
+			currentMap->setPathTile(getTileY(), getTileX(), 2);
 			break;
 		default:
 			break;
@@ -161,12 +167,12 @@ int GrassTile::getType()
 
 HoeDirt::HoeDirt()
 {
-
+	isDirtWet = false;
 }
 
 HoeDirt::HoeDirt(int _x, int _y) : Object(_x, _y, 64, 64, false, -1, 4)
 {
-
+	isDirtWet = false;
 }
 
 bool HoeDirt::interact(TileMap* currentMap, Item* currentItem)
@@ -181,6 +187,10 @@ bool HoeDirt::interact(TileMap* currentMap, Item* currentItem)
 		case(1): //pickaxe tool
 			currentMap->blankTile(getTileX(), getTileY(), PATH_LAYER);
 			currentMap->blankObj(getX(), getY(), PATH_LAYER);
+			break;
+		case(2): //watering can
+			currentMap->setPathTile(getTileY(), getTileX(), 4);
+			setWet(true);
 			break;
 		default:
 			break;
@@ -200,21 +210,34 @@ int HoeDirt::getType()
 	return HOEDIRT;
 }
 
+bool HoeDirt::isWet()
+{
+	return isDirtWet;
+}
+
+void HoeDirt::setWet(bool wetState)
+{
+	isDirtWet = wetState;
+}
+
 Crop::Crop()
 {
 	cropTicks = 0;
 	growthStage = 0;
 	maxGrowthStage = -1;
-	isWet = false;
+	isCropWet = false;
 }
+
 
 Crop::Crop(int _x, int _y) : Object(_x, _y, 64, 64, false, -1, 2)
 {
 	cropTicks = 0;
 	growthStage = 0;
 	maxGrowthStage = 3;
-	isWet = false;
+	isCropWet = false;
 }
+
+
 
 void Crop::update(TileMap* currentMap, int currentUpdateTicks)
 {
@@ -280,4 +303,14 @@ bool Crop::interact(TileMap* currentMap, Item* currentItem)
 		break;
 	}
 	return true;
+}
+
+bool Crop::isWet()
+{
+	return isCropWet;
+}
+
+void Crop::setWet(bool wetState)
+{
+	isCropWet = wetState;
 }

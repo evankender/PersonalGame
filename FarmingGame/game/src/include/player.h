@@ -16,7 +16,10 @@ public:
     Player();
     Player(TileMap &tileMap);
     void move(int dx, int dy);
-    void drawPlayer(Texture2D* playerSprite, Texture2D* imageSet);
+    void drawPlayer(Texture2D* playerSprite);
+    void drawHotBar(Texture2D* imageSet);
+    void drawInventory(Texture* imageSet);
+    void updateInventory();
     void updateSpeed();
     int getX();
     int getY();
@@ -32,7 +35,7 @@ public:
     Item* getCurrentItem();
     void setSelSlot(int selSlot);
     Rectangle getDestRec(int x, int y);
-    void pickUp(Item* item);
+    bool pickUp(Item* item);
 private:
     int playerX;
     int playerY;
@@ -43,7 +46,7 @@ private:
     float playerSpeed;
     Rectangle playerRec;
     int selSlot;
-    Inventory* hotBar;
+    Inventory* inventory;
 };
 
 #endif

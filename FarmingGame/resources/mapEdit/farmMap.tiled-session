@@ -3,7 +3,7 @@
         "height": 4300,
         "width": 2
     },
-    "activeFile": "house.tmj",
+    "activeFile": "farmmap.tmj",
     "automapping.whileDrawing": false,
     "expandedProjectPaths": [
         "."
@@ -21,22 +21,22 @@
         },
         "C:/Users/evank/Downloads/lpc-floors/lpc-floors/floors.tsx": {
             "scaleInDock": 1,
-            "scaleInEditor": 1
+            "scaleInEditor": 1.5
         },
         "C:/Users/evank/Downloads/lpc-walls/lpc-walls/walls.tsx": {
             "scaleInDock": 1,
-            "scaleInEditor": 1
+            "scaleInEditor": 1.5
         },
         "farmmap.tmj": {
             "expandedObjectLayers": [
-                4,
-                3
+                3,
+                4
             ],
-            "scale": 0.75,
-            "selectedLayer": 1,
+            "scale": 0.33,
+            "selectedLayer": 0,
             "viewCenter": {
-                "x": 1024,
-                "y": 1022.6666666666665
+                "x": 798.4848484848485,
+                "y": 1336.3636363636365
             }
         },
         "farmmap.tmj#terrain": {
@@ -53,16 +53,19 @@
             "scale": 1.5,
             "selectedLayer": 1,
             "viewCenter": {
-                "x": 1049,
-                "y": 1023.3333333333333
+                "x": 1048.6666666666665,
+                "y": 1023
             }
         },
         "house.tmj": {
-            "scale": 1.5,
-            "selectedLayer": 8,
+            "expandedObjectLayers": [
+                3
+            ],
+            "scale": 0.5,
+            "selectedLayer": 0,
             "viewCenter": {
-                "x": 862,
-                "y": 719
+                "x": 968,
+                "y": 1091
             }
         },
         "house.tmj#walls": {
@@ -72,8 +75,8 @@
         "randomGrass.tmj": {
             "expandedObjectLayers": [
                 7,
-                9,
                 8,
+                9,
                 10
             ],
             "scale": 2.0984,
@@ -105,6 +108,11 @@
             "scaleInDock": 0.75,
             "scaleInEditor": 1.5
         },
+        "tilemap2.tsx": {
+            "dynamicWrapping": false,
+            "scaleInDock": 0.75,
+            "scaleInEditor": 1.5
+        },
         "treeHitBox.tmj": {
             "expandedObjectLayers": [
                 5
@@ -112,16 +120,16 @@
             "scale": 1.3021,
             "selectedLayer": 0,
             "viewCenter": {
-                "x": 1023.730896244528,
-                "y": 1023.730896244528
+                "x": 1023.7308962445279,
+                "y": 1023.3469011596651
             }
         },
         "waterHitBox.tmj": {
             "scale": 3.397,
             "selectedLayer": 4,
             "viewCenter": {
-                "x": 1023.8445687371211,
-                "y": 1023.844568737121
+                "x": 1023.844568737121,
+                "y": 1023.6973800412129
             }
         },
         "waterHitBox.tmj#terrain": {
@@ -133,7 +141,8 @@
         }
     },
     "last.exportedFilePath": "C:/PreAlpha/PersonalGame/FarmingGame/resources/maps",
-    "last.imagePath": "C:/Users/evank/Downloads/lpc-walls/lpc-walls",
+    "last.externalTilesetPath": "C:/PreAlpha/PersonalGame/FarmingGame/resources/mapEdit",
+    "last.imagePath": "C:/PreAlpha/PersonalGame/FarmingGame/resources/textures",
     "map.height": 64,
     "map.lastUsedExportFilter": "JSON map files (*.tmj *.json)",
     "map.lastUsedFormat": "json",
@@ -144,6 +153,7 @@
         "waterHitBox.tmj",
         "treeHitBox.tmj",
         "tilemap.tsx",
+        "tilemap2.tsx",
         "farmmap2.tmj",
         "house.tmj",
         "C:/Users/evank/Downloads/lpc-walls/lpc-walls/walls.tsx",
@@ -152,18 +162,20 @@
     "project": "farmMap.tiled-project",
     "property.type": "bool",
     "recentFiles": [
-        "farmmap.tmj",
-        "randomGrass.tmj",
-        "waterHitBox.tmj",
-        "treeHitBox.tmj",
-        "tilemap.tsx",
-        "farmmap2.tmj",
         "C:/Users/evank/Downloads/lpc-floors/lpc-floors/floors.tsx",
         "C:/Users/evank/Downloads/lpc-walls/lpc-walls/walls.tsx",
         "house.tmj",
+        "farmmap2.tmj",
+        "tilemap2.tsx",
+        "tilemap.tsx",
+        "treeHitBox.tmj",
+        "waterHitBox.tmj",
+        "randomGrass.tmj",
+        "farmmap.tmj",
         "rule1.tmj",
         "terrain.tsx"
     ],
     "tileset.embedInMap": true,
+    "tileset.lastUsedFilter": "Tiled tileset files (*.tsx *.xml)",
     "tileset.lastUsedFormat": "tsx"
 }

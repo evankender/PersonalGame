@@ -69,6 +69,7 @@ void GameState::updateRunning()
 void  GameState::updatePaused()
 {
 	handleInputPaused();
+	player.updateInventory();
 }
 
 void GameState::updateLoading()
@@ -89,7 +90,7 @@ void GameState::draw()
 {
 	currentMap.drawBack(&player, &loadedTextures[currentMapTexture]);
 
-	player.drawPlayer(&loadedTextures[currentPlayerTexture], &loadedTextures[currentItemsTexture]);
+	player.drawPlayer(&loadedTextures[currentPlayerTexture]);
 
 	currentMap.drawFront(&player, &loadedTextures[currentMapTexture]);
 
@@ -100,6 +101,7 @@ void GameState::draw()
 	{
 	case Running:
 		drawRunning();
+		
 		break;
 	case Paused:
 		drawPaused();
@@ -116,11 +118,14 @@ void GameState::draw()
 void GameState::drawRunning()
 {
 	drawCursor();
+	player.drawHotBar(&loadedTextures[currentItemsTexture]);
 }
 
 void GameState::drawPaused()
 {
 	DrawRectangle(0, 0, GetScreenWidth(), GetScreenHeight(), ColorAlpha(BLACK, 0.5f));
+	player.drawInventory(&loadedTextures[currentItemsTexture]);
+
 }
 
 void GameState::drawLoading()

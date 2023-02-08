@@ -133,6 +133,11 @@ Pickaxe::Pickaxe() : Tool(1) //pickaxe item Id 1
 
 }
 
+Watercan::Watercan() : Tool(2) //waterCan item Id 2
+{
+
+}
+
 Placeable::Placeable()
 {
 
